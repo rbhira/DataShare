@@ -1,0 +1,22 @@
+# IDE
+**/.idea/
+*.iml
+
+# Java / Spring
+**/target/
+
+# Angular / Node
+**/node_modules/
+**/.angular/
+**/dist/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Fichiers téléversés
+uploads/
+
+# Logs
+*.log
