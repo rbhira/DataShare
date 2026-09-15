@@ -30,11 +30,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String authorizationHeader = request.getHeader("Authorization");
 
-        System.out.println(
-                "JWT FILTER - Authorization présent : "
-                        + (authorizationHeader != null)
-        );
-
         if (authorizationHeader == null
                 || !authorizationHeader.startsWith("Bearer ")) {
 
@@ -45,10 +40,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = authorizationHeader.substring(7);
 
         boolean tokenValid = jwtService.isTokenValid(token);
-
-        System.out.println(
-                "JWT FILTER - Token valide : " + tokenValid
-        );
 
         if (tokenValid
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -66,13 +57,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     .getContext()
                     .setAuthentication(authentication);
 
-            System.out.println(
-                    "JWT FILTER - Utilisateur authentifié : "
-                            + SecurityContextHolder
-                            .getContext()
-                            .getAuthentication()
-                            .isAuthenticated()
-            );
         }
 
         filterChain.doFilter(request, response);

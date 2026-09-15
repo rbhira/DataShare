@@ -1,5 +1,9 @@
 package com.datashare.auth;
 
+import com.datashare.file.EmptyFileException;
+import com.datashare.file.FileTooLargeException;
+import com.datashare.file.InvalidFileTypeException;
+import com.datashare.file.InvalidExpirationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -42,5 +46,41 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("message", message));
+    }
+
+    @ExceptionHandler(EmptyFileException.class)
+    public ResponseEntity<Map<String, String>> handleEmptyFile(
+            EmptyFileException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("message", exception.getMessage()));
+    }
+
+    @ExceptionHandler(FileTooLargeException.class)
+    public ResponseEntity<Map<String, String>> handleFileTooLarge(
+            FileTooLargeException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body(Map.of("message", exception.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidFileTypeException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidFileType(
+            InvalidFileTypeException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+                .body(Map.of("message", exception.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidExpirationException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidExpiration(
+            InvalidExpirationException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("message", exception.getMessage()));
     }
 }
