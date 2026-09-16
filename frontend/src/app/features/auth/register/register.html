@@ -1,0 +1,69 @@
+<main class="auth-page">
+
+  <section class="auth-card">
+
+    <h1>Créer un compte</h1>
+
+    <form (ngSubmit)="submit()">
+
+      <label for="email">
+        Email
+      </label>
+
+      <input
+        id="email"
+        type="email"
+        name="email"
+        [(ngModel)]="email"
+        autocomplete="email"
+      />
+
+      <label for="password">
+        Mot de passe
+      </label>
+
+      <input
+        id="password"
+        type="password"
+        name="password"
+        [(ngModel)]="password"
+        autocomplete="new-password"
+      />
+
+      <label for="confirmPassword">
+        Confirmer le mot de passe
+      </label>
+
+      <input
+        id="confirmPassword"
+        type="password"
+        name="confirmPassword"
+        [(ngModel)]="confirmPassword"
+        autocomplete="new-password"
+      />
+
+      <button
+        type="submit"
+        [disabled]="loading"
+      >
+        {{ loading ? 'Création...' : 'Créer le compte' }}
+      </button>
+
+    </form>
+
+    @if (errorMessage) {
+      <p class="error">
+        {{ errorMessage }}
+      </p>
+    }
+
+    <p class="link">
+      Déjà un compte ?
+      <a routerLink="/login">
+        Se connecter
+      </a>
+    </p>
+
+  </section>
+
+</main>
