@@ -1,0 +1,92 @@
+<main class="upload-page">
+
+  <section class="upload-card">
+
+    <h1>DataShare</h1>
+
+    <p class="subtitle">
+      Sélectionnez un fichier à envoyer
+    </p>
+
+    <label class="file-zone">
+
+      <span>
+        Sélectionner un fichier
+      </span>
+
+      <input
+        type="file"
+        (change)="onFileSelected($event)"
+      />
+
+    </label>
+
+    @if (selectedFile) {
+      <p class="file-name">
+        {{ selectedFile.name }}
+        - {{ selectedFile.size }} octets
+      </p>
+    }
+
+    <div class="expiration">
+
+      <label for="expiresAt">
+        Date d'expiration facultative
+      </label>
+
+      <input
+        id="expiresAt"
+        type="datetime-local"
+        (change)="onExpirationChanged($event)"
+      />
+
+      <small>
+        Sans choix, le fichier expirera automatiquement
+        après 7 jours.
+      </small>
+
+    </div>
+
+    <button
+      type="button"
+      (click)="upload()"
+      [disabled]="loading"
+    >
+      {{ loading ? 'Envoi en cours...' : 'Envoyer le fichier' }}
+    </button>
+
+    @if (successMessage) {
+      <p class="success">
+        {{ successMessage }}
+      </p>
+    }
+
+    @if (errorMessage) {
+      <p class="error">
+        {{ errorMessage }}
+      </p>
+    }
+
+    @if (uploadedFile) {
+
+      <div class="result">
+
+        <strong>
+          {{ uploadedFile.originalName }}
+        </strong>
+
+        <span>
+          Taille : {{ uploadedFile.size }} octets
+        </span>
+
+        <span>
+          Expiration :
+          {{ uploadedFile.expiresAt }}
+        </span>
+
+      </div>
+    }
+
+  </section>
+
+</main>
