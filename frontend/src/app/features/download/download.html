@@ -1,0 +1,79 @@
+<main class="page">
+
+  <div class="brand">
+    DataShare
+  </div>
+
+  <section class="card">
+
+    <p
+      *ngIf="loading"
+      class="message"
+      role="status"
+    >
+      Chargement du fichier...
+    </p>
+
+    <div
+      *ngIf="errorMessage"
+      class="error"
+      role="alert"
+    >
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="fileInfo && !loading">
+
+      <h1>
+        Télécharger le fichier
+      </h1>
+
+      <div class="file-info">
+
+        <div class="info-row">
+          <span>Nom</span>
+          <strong>
+            {{ fileInfo.originalName }}
+          </strong>
+        </div>
+
+        <div class="info-row">
+          <span>Type</span>
+          <strong>
+            {{ fileInfo.mimeType }}
+          </strong>
+        </div>
+
+        <div class="info-row">
+          <span>Taille</span>
+          <strong>
+            {{ formatSize(fileInfo.size) }}
+          </strong>
+        </div>
+
+        <div class="info-row">
+          <span>Expiration</span>
+          <strong>
+            {{ fileInfo.expiresAt | date:'dd/MM/yyyy HH:mm' }}
+          </strong>
+        </div>
+
+      </div>
+
+      <button
+        type="button"
+        (click)="download()"
+        [disabled]="downloading"
+      >
+        {{
+          downloading
+            ? 'Téléchargement...'
+            : 'Télécharger'
+        }}
+      </button>
+
+    </div>
+
+  </section>
+
+</main>
