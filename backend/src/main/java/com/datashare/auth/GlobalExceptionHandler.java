@@ -4,6 +4,8 @@ import com.datashare.file.EmptyFileException;
 import com.datashare.file.FileTooLargeException;
 import com.datashare.file.InvalidFileTypeException;
 import com.datashare.file.InvalidExpirationException;
+import com.datashare.file.DownloadNotFoundException;
+import com.datashare.file.FileExpiredException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -81,6 +83,23 @@ public class GlobalExceptionHandler {
     ) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("message", exception.getMessage()));
+    }
+    @ExceptionHandler(DownloadNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleDownloadNotFound(
+            DownloadNotFoundException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(Map.of("message", exception.getMessage()));
+    }
+
+    @ExceptionHandler(FileExpiredException.class)
+    public ResponseEntity<Map<String, String>> handleFileExpired(
+            FileExpiredException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.GONE)
                 .body(Map.of("message", exception.getMessage()));
     }
 }
