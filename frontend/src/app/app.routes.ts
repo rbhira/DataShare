@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { Login } from './features/auth/login/login';
 import { Register } from './features/auth/register/register';
 import { Upload } from './features/upload/upload';
+import { Download } from './features/download/download';
 
 export const routes: Routes = [
   {
@@ -16,6 +17,10 @@ export const routes: Routes = [
   {
     path: 'upload',
     component: Upload
+  },
+  {
+    path: 'download/:token',
+    component: Download
   },
   {
     path: '',
