@@ -1,0 +1,150 @@
+<div class="page">
+
+    <header class="header">
+        <a class="brand" routerLink="/upload">
+            DataShare
+        </a>
+
+        <div class="header-actions">
+            <button
+                    type="button"
+                    class="header-link"
+                    (click)="addFiles()">
+                Ajouter des fichiers
+            </button>
+
+            <button
+                    type="button"
+                    class="header-link"
+                    (click)="logout()">
+                Déconnexion
+            </button>
+        </div>
+    </header>
+
+    <main class="content">
+
+        <section class="files-card">
+
+            <h1>Mes fichiers</h1>
+
+            <div
+                    class="filters"
+                    role="group"
+                    aria-label="Filtrer les fichiers">
+
+                <button
+                        type="button"
+                        [class.active]="selectedFilter === 'all'"
+                        (click)="selectFilter('all')">
+                    Tous
+                </button>
+
+                <button
+                        type="button"
+                        [class.active]="selectedFilter === 'active'"
+                        (click)="selectFilter('active')">
+                    Actifs
+                </button>
+
+                <button
+                        type="button"
+                        [class.active]="selectedFilter === 'expired'"
+                        (click)="selectFilter('expired')">
+                    Expiré
+                </button>
+
+            </div>
+
+            <p
+                    *ngIf="loading"
+                    class="status"
+                    role="status">
+                Chargement de vos fichiers...
+            </p>
+
+            <p
+                    *ngIf="errorMessage"
+                    class="error"
+                    role="alert">
+                {{ errorMessage }}
+            </p>
+
+            <p
+                    *ngIf="
+          !loading &&
+          !errorMessage &&
+          filteredFiles.length === 0
+        "
+                    class="empty">
+                Aucun fichier à afficher.
+            </p>
+
+            <div
+                    *ngIf="
+          !loading &&
+          !errorMessage &&
+          filteredFiles.length > 0
+        "
+                    class="file-list">
+
+                <article
+                        *ngFor="let file of filteredFiles"
+                        class="file-item"
+                        [class.expired]="file.expired">
+
+                    <div class="file-info">
+
+                        <div class="file-name">
+                            {{ file.originalName }}
+                        </div>
+
+                        <div class="file-details">
+              <span>
+                {{ formatSize(file.size) }}
+              </span>
+
+                            <span>
+                Envoyé le
+                                {{ file.uploadedAt | date:'dd/MM/yyyy' }}
+              </span>
+
+                            <span>
+                Expiration le
+                                {{ file.expiresAt | date:'dd/MM/yyyy' }}
+              </span>
+                        </div>
+
+                        <div
+                                class="expiration"
+                                [class.expired-text]="file.expired">
+                            {{ expirationText(file) }}
+                        </div>
+
+                    </div>
+
+                    <div class="file-actions">
+
+                        <button
+                                type="button"
+                                class="access-button"
+                                [disabled]="file.expired"
+                                (click)="accessFile(file)">
+                            Accéder
+                        </button>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        Copyright DataShare© 2025
+    </footer>
+
+</div>
