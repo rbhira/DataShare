@@ -4,6 +4,7 @@ import { Login } from './features/auth/login/login';
 import { Register } from './features/auth/register/register';
 import { Upload } from './features/upload/upload';
 import { Download } from './features/download/download';
+import { MyFiles } from './features/my-files/my-files';
 
 export const routes: Routes = [
   {
@@ -21,6 +22,10 @@ export const routes: Routes = [
   {
     path: 'download/:token',
     component: Download
+  },
+  {
+    path: 'my-files',
+    component: MyFiles
   },
   {
     path: '',
