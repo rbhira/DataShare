@@ -84,4 +84,48 @@ class FileStorageServiceTest {
                 () -> service.store(file)
         );
     }
+    @Test
+    void shouldDeleteStoredFile()
+            throws Exception {
+
+        StorageProperties properties =
+                new StorageProperties(
+                        tempDir.toString()
+                );
+
+        FileStorageService service =
+                new FileStorageService(properties);
+
+        Path storedFile =
+                tempDir.resolve("uuid-test.txt");
+
+        Files.writeString(
+                storedFile,
+                "Bonjour DataShare"
+        );
+
+        assertTrue(Files.exists(storedFile));
+
+        service.delete("uuid-test.txt");
+
+        assertFalse(Files.exists(storedFile));
+    }
+
+    @Test
+    void shouldRejectDeletionOutsideUploadDirectory()
+            throws Exception {
+
+        StorageProperties properties =
+                new StorageProperties(
+                        tempDir.toString()
+                );
+
+        FileStorageService service =
+                new FileStorageService(properties);
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.delete("../outside.txt")
+        );
+    }
 }

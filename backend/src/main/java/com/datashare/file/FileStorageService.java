@@ -63,4 +63,25 @@ public class FileStorageService {
                 targetPath.toString()
         );
     }
+    public void delete(String storedName)
+            throws IOException {
+
+        if (storedName == null || storedName.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Le nom du fichier stocké est invalide"
+            );
+        }
+
+        Path targetPath = uploadPath
+                .resolve(storedName)
+                .normalize();
+
+        if (!targetPath.startsWith(uploadPath)) {
+            throw new IllegalArgumentException(
+                    "Chemin de fichier invalide"
+            );
+        }
+
+        Files.deleteIfExists(targetPath);
+    }
 }
