@@ -1,79 +1,68 @@
-<main class="page">
+<app-auth-shell>
+  <section
+    class="download-card"
+    [class.error-state]="errorMessage && !loading"
+    aria-labelledby="download-title"
+  >
+    <h1 id="download-title">Télécharger un fichier</h1>
 
-  <div class="brand">
-    DataShare
-  </div>
+    @if (loading) {
+      <p class="callout callout-info" role="status">
+        <span aria-hidden="true">i</span>
+        Chargement du fichier...
+      </p>
+    }
 
-  <section class="card">
+    @if (errorMessage) {
+      <p class="callout callout-error" role="alert">
+        <span aria-hidden="true">!</span>
+        {{ errorMessage }}
+      </p>
+    }
 
-    <p
-      *ngIf="loading"
-      class="message"
-      role="status"
-    >
-      Chargement du fichier...
-    </p>
+    @if (fileInfo && !loading) {
+      <div class="file-summary">
+        <svg class="file-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 2.75h8l4 4V21.25H6z" />
+          <path d="M14 2.75v4h4" />
+        </svg>
 
-    <div
-      *ngIf="errorMessage"
-      class="error"
-      role="alert"
-    >
-      {{ errorMessage }}
-    </div>
-
-    <div *ngIf="fileInfo && !loading">
-
-      <h1>
-        Télécharger le fichier
-      </h1>
-
-      <div class="file-info">
-
-        <div class="info-row">
-          <span>Nom</span>
-          <strong>
-            {{ fileInfo.originalName }}
-          </strong>
+        <div class="file-copy">
+          <strong>{{ fileInfo.originalName }}</strong>
+          <span>{{ formatSize(fileInfo.size) }}</span>
         </div>
-
-        <div class="info-row">
-          <span>Type</span>
-          <strong>
-            {{ fileInfo.mimeType }}
-          </strong>
-        </div>
-
-        <div class="info-row">
-          <span>Taille</span>
-          <strong>
-            {{ formatSize(fileInfo.size) }}
-          </strong>
-        </div>
-
-        <div class="info-row">
-          <span>Expiration</span>
-          <strong>
-            {{ fileInfo.expiresAt | date:'dd/MM/yyyy HH:mm' }}
-          </strong>
-        </div>
-
       </div>
 
+      <p class="callout callout-info">
+        <span aria-hidden="true">i</span>
+        Ce fichier est disponible jusqu'au
+        {{ fileInfo.expiresAt | date:'dd/MM/yyyy à HH:mm' }}.
+      </p>
+
+      <dl class="metadata">
+        <div>
+          <dt>Type</dt>
+          <dd>{{ fileInfo.mimeType }}</dd>
+        </div>
+        <div>
+          <dt>Taille</dt>
+          <dd>{{ formatSize(fileInfo.size) }}</dd>
+        </div>
+      </dl>
+
       <button
+        class="download-button"
         type="button"
         (click)="download()"
         [disabled]="downloading"
       >
-        {{
-          downloading
-            ? 'Téléchargement...'
-            : 'Télécharger'
-        }}
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7.5 5.5H6.25a4.25 4.25 0 0 0-.68 8.45A6.25 6.25 0 0 0 17.7 15.88a5 5 0 0 0 .05-9.98H16.5" />
+          <path d="M12 6v7.5" />
+          <path d="m8.9 10.4 3.1 3.1 3.1-3.1" />
+        </svg>
+        {{ downloading ? 'Téléchargement...' : 'Télécharger' }}
       </button>
-
-    </div>
-
+    }
   </section>
-
-</main>
+</app-auth-shell>

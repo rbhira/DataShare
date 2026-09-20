@@ -1,0 +1,177 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.auth-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(640px, 100%);
+  padding: 24px;
+  gap: 24px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.25);
+}
+
+h1 {
+  align-self: stretch;
+  height: 40px;
+  margin: 0;
+  color: #000000;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 40px;
+  text-align: center;
+  font-feature-settings: 'liga' off;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+label {
+  color: #1e1e1e;
+  font-family: Inter, Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+}
+
+input {
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  padding: 12px 16px;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1e1e1e;
+  font-size: 16px;
+  line-height: 16px;
+}
+
+input::placeholder {
+  color: #b3b3b3;
+}
+
+input:focus-visible {
+  border-color: #e27f29;
+  outline: 3px solid rgba(226, 127, 41, 0.2);
+  outline-offset: 1px;
+}
+
+input[aria-invalid='true'] {
+  border-color: #9c3333;
+}
+
+.field-error {
+  margin: -2px 0 0;
+  color: #9c3333;
+  font-size: 14px;
+  line-height: 16px;
+}
+
+.server-message,
+.success-message {
+  align-self: stretch;
+  margin: 0;
+  padding: 8px;
+  border: 1px solid;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 16px;
+}
+
+.server-message {
+  border-color: #e8a6a6;
+  background: #ffe2e2;
+  color: #9c3333;
+}
+
+.success-message {
+  border-color: #b1c9f5;
+  background: #e2ecff;
+  color: #2a3f72;
+}
+
+.secondary-link {
+  margin: 0;
+  text-align: center;
+}
+
+.secondary-link a {
+  color: #e27f29;
+  font-size: 16px;
+  line-height: 16px;
+  text-decoration: none;
+}
+
+.secondary-link a:hover {
+  text-decoration: underline;
+}
+
+.submit-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 40px;
+  padding: 12px;
+  border: 1px solid rgba(205, 94, 20, 0.5);
+  border-radius: 8px;
+  background: rgba(255, 129, 45, 0.13);
+  color: #ba681f;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 16px;
+  cursor: pointer;
+}
+
+.submit-button:hover:not(:disabled) {
+  background: rgba(255, 129, 45, 0.2);
+}
+
+.submit-button:disabled {
+  border-color: rgba(183, 167, 156, 0.2);
+  background: rgba(183, 167, 156, 0.2);
+  color: #aea49b;
+  cursor: wait;
+}
+
+@media (min-width: 768px) {
+  .auth-card.login-card {
+    min-height: 384px;
+  }
+
+  .auth-card.register-card {
+    min-height: 472px;
+  }
+}
+
+@media (max-width: 767px) {
+  .auth-card {
+    width: min(345px, 100%);
+    padding: 24px;
+  }
+
+  .auth-card.login-card {
+    min-height: 384px;
+  }
+
+  .auth-card.register-card {
+    min-height: 472px;
+  }
+}

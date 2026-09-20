@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { AuthShell } from '../../shared/auth-shell/auth-shell';
 import {
   FileDownloadInfo,
   FileDownloadService
@@ -9,7 +10,7 @@ import {
 @Component({
   selector: 'app-download',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, AuthShell],
   templateUrl: './download.html',
   styleUrl: './download.css'
 })

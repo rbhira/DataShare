@@ -1,1 +1,69 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --ds-peach: #ffb88c;
+  --ds-coral: #de6262;
+  --ds-ink: #2c2c2c;
+  --ds-text: #1e1e1e;
+  --ds-accent: #e27f29;
+  --ds-accent-strong: #e77a6e;
+  --ds-accent-soft: rgba(255, 193, 145, 0.16);
+  --ds-page: #fff8f3;
+  --ds-mobile-page: #fff7f7;
+  --ds-header-soft: #ffeee3;
+  --ds-border: #d9d9d9;
+  --ds-border-soft: rgba(215, 99, 11, 0.2);
+  --ds-error: #9c3333;
+  --ds-success: #2a3f72;
+  --ds-warning: #aa642b;
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: 'DM Sans', 'Segoe UI', Arial, Helvetica, sans-serif;
+  color: var(--ds-text);
+  background: var(--ds-page);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a,
+input,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid #1e1e1e;
+  outline-offset: 3px;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
