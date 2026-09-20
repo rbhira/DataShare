@@ -13,4 +13,8 @@ public interface StoredFileRepository
     List<StoredFile> findByOwnerEmailOrderByUploadedAtDesc(
             String email
     );
+    Optional<StoredFile> findByIdAndOwnerEmail(
+            Long id,
+            String email
+    );
 }

@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import com.datashare.file.FileDeleteNotFoundException;
+import com.datashare.file.FileDeletionException;
 
 import java.util.Map;
 
@@ -100,6 +102,23 @@ public class GlobalExceptionHandler {
     ) {
         return ResponseEntity
                 .status(HttpStatus.GONE)
+                .body(Map.of("message", exception.getMessage()));
+    }
+    @ExceptionHandler(FileDeleteNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleFileDeleteNotFound(
+            FileDeleteNotFoundException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(Map.of("message", exception.getMessage()));
+    }
+
+    @ExceptionHandler(FileDeletionException.class)
+    public ResponseEntity<Map<String, String>> handleFileDeletion(
+            FileDeletionException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("message", exception.getMessage()));
     }
 }
