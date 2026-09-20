@@ -1,0 +1,58 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.auth-shell {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  overflow: hidden;
+  background: linear-gradient(
+    172.84deg,
+    #ffb88c 2.29%,
+    #de6262 97.71%
+  );
+}
+
+app-site-header {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 10;
+}
+
+.auth-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: 72px 24px 56px;
+}
+
+.footer {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: min(1280px, 100%);
+  height: 56px;
+  margin: 0 auto;
+  padding: 16px;
+  color: #ffffff;
+  font-family: Inter, Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+}
+
+@media (max-width: 767px) {
+  .auth-main {
+    padding: 72px 24px;
+  }
+
+  .footer {
+    display: none;
+  }
+}

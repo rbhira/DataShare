@@ -1,150 +1,218 @@
-<div class="page">
+<div class="workspace">
+  <aside class="sidebar desktop-sidebar" aria-label="Navigation de l'espace personnel">
+    <a class="sidebar-brand" routerLink="/upload">DataShare</a>
 
-    <header class="header">
-        <a class="brand" routerLink="/upload">
-            DataShare
-        </a>
+    <nav class="sidebar-nav" aria-label="Navigation principale">
+      <a class="sidebar-link active" routerLink="/my-files" aria-current="page">
+        Mes fichiers
+      </a>
+    </nav>
 
-        <div class="header-actions">
-            <button
-                    type="button"
-                    class="header-link"
-                    (click)="addFiles()">
-                Ajouter des fichiers
-            </button>
+    <footer class="sidebar-footer">
+      Copyright DataShare© 2025
+    </footer>
+  </aside>
 
-            <button
-                    type="button"
-                    class="header-link"
-                    (click)="logout()">
-                Déconnexion
-            </button>
-        </div>
+  <div class="workspace-main">
+    <header class="workspace-header">
+      <button
+        type="button"
+        class="mobile-menu-button"
+        aria-label="Ouvrir le menu"
+        [attr.aria-expanded]="mobileMenuOpen"
+        (click)="openMobileMenu()"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16" />
+        </svg>
+      </button>
+
+      <div class="mobile-account" aria-label="Espace personnel">
+        <span class="account-avatar" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="8" r="3.5" />
+            <path d="M5.5 20c.8-4 3-6 6.5-6s5.7 2 6.5 6" />
+          </svg>
+        </span>
+        <span>Mon espace</span>
+      </div>
+
+      <div class="desktop-actions">
+        <button
+          type="button"
+          class="dark-action"
+          (click)="addFiles()"
+        >
+          Ajouter des fichiers
+        </button>
+
+        <button
+          type="button"
+          class="logout-action"
+          (click)="logout()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M10 5H5v14h5" />
+            <path d="M13 8l4 4-4 4" />
+            <path d="M8 12h9" />
+          </svg>
+          Déconnexion
+        </button>
+      </div>
     </header>
 
-    <main class="content">
+    <main class="workspace-content">
+      <section class="files-section" aria-labelledby="files-title">
+        <h1 id="files-title">Mes fichiers</h1>
 
-        <section class="files-card">
+        <div
+          class="filters"
+          role="group"
+          aria-label="Filtrer les fichiers"
+        >
+          <button
+            type="button"
+            [class.active]="selectedFilter === 'all'"
+            [attr.aria-pressed]="selectedFilter === 'all'"
+            (click)="selectFilter('all')"
+          >
+            Tous
+          </button>
 
-            <h1>Mes fichiers</h1>
+          <button
+            type="button"
+            [class.active]="selectedFilter === 'active'"
+            [attr.aria-pressed]="selectedFilter === 'active'"
+            (click)="selectFilter('active')"
+          >
+            Actifs
+          </button>
 
-            <div
-                    class="filters"
-                    role="group"
-                    aria-label="Filtrer les fichiers">
+          <button
+            type="button"
+            [class.active]="selectedFilter === 'expired'"
+            [attr.aria-pressed]="selectedFilter === 'expired'"
+            (click)="selectFilter('expired')"
+          >
+            Expiré
+          </button>
+        </div>
 
-                <button
-                        type="button"
-                        [class.active]="selectedFilter === 'all'"
-                        (click)="selectFilter('all')">
-                    Tous
-                </button>
+        <p *ngIf="loading" class="status" role="status">
+          Chargement de vos fichiers...
+        </p>
 
-                <button
-                        type="button"
-                        [class.active]="selectedFilter === 'active'"
-                        (click)="selectFilter('active')">
-                    Actifs
-                </button>
+        <p *ngIf="errorMessage" class="callout-error" role="alert">
+          {{ errorMessage }}
+        </p>
 
-                <button
-                        type="button"
-                        [class.active]="selectedFilter === 'expired'"
-                        (click)="selectFilter('expired')">
-                    Expiré
-                </button>
+        <p
+          *ngIf="!loading && !errorMessage && filteredFiles.length === 0"
+          class="empty"
+        >
+          Aucun fichier à afficher.
+        </p>
 
+        <div
+          *ngIf="!loading && !errorMessage && filteredFiles.length > 0"
+          class="file-list"
+        >
+          <article
+            *ngFor="let file of filteredFiles"
+            class="file-item"
+            [class.expired]="file.expired"
+          >
+            <svg class="file-type-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 2.75h8l4 4V21.25H6z" />
+              <path d="M14 2.75v4h4" />
+            </svg>
+
+            <div class="file-info">
+              <strong class="file-name">{{ file.originalName }}</strong>
+              <span
+                class="expiration"
+                [class.expired-text]="file.expired"
+              >
+                {{ expirationText(file) }}
+              </span>
+              <span class="file-metadata">
+                {{ formatSize(file.size) }} · envoyé le
+                {{ file.uploadedAt | date:'dd/MM/yyyy' }} · expiration le
+                {{ file.expiresAt | date:'dd/MM/yyyy' }}
+              </span>
             </div>
 
-            <p
-                    *ngIf="loading"
-                    class="status"
-                    role="status">
-                Chargement de vos fichiers...
-            </p>
-
-            <p
-                    *ngIf="errorMessage"
-                    class="error"
-                    role="alert">
-                {{ errorMessage }}
-            </p>
-
-            <p
-                    *ngIf="
-          !loading &&
-          !errorMessage &&
-          filteredFiles.length === 0
-        "
-                    class="empty">
-                Aucun fichier à afficher.
-            </p>
-
-            <div
-                    *ngIf="
-          !loading &&
-          !errorMessage &&
-          filteredFiles.length > 0
-        "
-                    class="file-list">
-
-                <article
-                        *ngFor="let file of filteredFiles"
-                        class="file-item"
-                        [class.expired]="file.expired">
-
-                    <div class="file-info">
-
-                        <div class="file-name">
-                            {{ file.originalName }}
-                        </div>
-
-                        <div class="file-details">
-              <span>
-                {{ formatSize(file.size) }}
-              </span>
-
-                            <span>
-                Envoyé le
-                                {{ file.uploadedAt | date:'dd/MM/yyyy' }}
-              </span>
-
-                            <span>
-                Expiration le
-                                {{ file.expiresAt | date:'dd/MM/yyyy' }}
-              </span>
-                        </div>
-
-                        <div
-                                class="expiration"
-                                [class.expired-text]="file.expired">
-                            {{ expirationText(file) }}
-                        </div>
-
-                    </div>
-
-                    <div class="file-actions">
-
-                        <button
-                                type="button"
-                                class="access-button"
-                                [disabled]="file.expired"
-                                (click)="accessFile(file)">
-                            Accéder
-                        </button>
-
-                    </div>
-
-                </article>
-
+            <div class="file-actions">
+              @if (!file.expired) {
+                <button
+                  type="button"
+                  class="access-button"
+                  (click)="accessFile(file)"
+                  [attr.aria-label]="'Accéder au fichier ' + file.originalName"
+                >
+                  <span class="access-label">Accéder</span>
+                  <svg class="arrow-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M5 12h13" />
+                    <path d="m13 7 5 5-5 5" />
+                  </svg>
+                </button>
+              } @else {
+                <span class="expired-message">
+                  Ce fichier a expiré, il n'est plus stocké chez nous
+                </span>
+              }
             </div>
-
-        </section>
-
+          </article>
+        </div>
+      </section>
     </main>
+  </div>
 
-    <footer class="footer">
+  @if (mobileMenuOpen) {
+    <button
+      type="button"
+      class="drawer-backdrop"
+      aria-label="Fermer le menu"
+      (click)="closeMobileMenu()"
+    ></button>
+
+    <aside class="mobile-drawer" aria-label="Menu mobile">
+      <div class="drawer-header">
+        <button
+          type="button"
+          class="drawer-close"
+          aria-label="Fermer le menu"
+          (click)="closeMobileMenu()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m6 6 12 12M18 6 6 18" />
+          </svg>
+        </button>
+        <span class="drawer-brand">DataShare</span>
+      </div>
+
+      <nav class="drawer-nav" aria-label="Navigation mobile">
+        <a
+          class="sidebar-link active"
+          routerLink="/my-files"
+          aria-current="page"
+          (click)="closeMobileMenu()"
+        >
+          Mes fichiers
+        </a>
+
+        <button type="button" class="drawer-action" (click)="addFiles()">
+          Ajouter des fichiers
+        </button>
+
+        <button type="button" class="drawer-action" (click)="logout()">
+          Déconnexion
+        </button>
+      </nav>
+
+      <footer class="drawer-footer">
         Copyright DataShare© 2025
-    </footer>
-
+      </footer>
+    </aside>
+  }
 </div>

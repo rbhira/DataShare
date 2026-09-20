@@ -1,120 +1,184 @@
 :host {
   display: block;
-  min-height: 100vh;
+  width: 100%;
 }
 
-.page {
-  min-height: 100vh;
-  box-sizing: border-box;
-  padding: 32px;
-  background:
-    linear-gradient(
-      135deg,
-      #ffb282,
-      #e96767
-    );
-  font-family: Arial, sans-serif;
-}
-
-.brand {
-  font-size: 24px;
-  font-weight: 700;
-  color: #1f1f1f;
-}
-
-.card {
-  width: min(440px, 100%);
-  box-sizing: border-box;
-  margin: 120px auto 0;
-  padding: 32px;
-  border-radius: 12px;
+.download-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: min(640px, 100%);
+  min-height: 280px;
+  padding: 24px;
+  gap: 24px;
+  border-radius: 16px;
   background: #ffffff;
-  box-shadow:
-    0 8px 24px
-    rgba(0, 0, 0, 0.14);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.25);
+}
+
+.download-card.error-state {
+  min-height: 144px;
 }
 
 h1 {
-  margin-top: 0;
-  margin-bottom: 28px;
-  font-size: 26px;
+  height: 40px;
+  margin: 0;
+  color: #000000;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 40px;
   text-align: center;
 }
 
-.file-info {
-  margin-bottom: 28px;
-}
-
-.info-row {
+.file-summary {
   display: flex;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 12px 0;
-  border-bottom: 1px solid #e8e8e8;
+  align-items: center;
+  gap: 16px;
+  min-height: 56px;
+  padding: 0 8px;
 }
 
-.info-row span {
-  color: #666666;
+.file-icon {
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: #1e1e1e;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
 }
 
-.info-row strong {
-  text-align: right;
-  overflow-wrap: anywhere;
+.file-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
 }
 
-button {
-  width: 100%;
-  padding: 13px 18px;
-  border: 0;
-  border-radius: 8px;
-  background: #222222;
-  color: #ffffff;
+.file-copy strong {
+  overflow: hidden;
+  color: #000000;
   font-size: 16px;
   font-weight: 600;
+  line-height: 24px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-copy span {
+  font-size: 14px;
+  line-height: 16px;
+}
+
+.callout {
+  display: flex;
+  align-items: center;
+  min-height: 32px;
+  margin: 0;
+  padding: 8px;
+  gap: 8px;
+  border: 1px solid;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 16px;
+}
+
+.callout > span {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  align-items: center;
+  justify-content: center;
+  border: 1.6px solid currentColor;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.callout-info {
+  border-color: #b1c9f5;
+  background: #e2ecff;
+  color: #2a3f72;
+}
+
+.callout-error {
+  border-color: #e8a6a6;
+  background: #ffe2e2;
+  color: #9c3333;
+}
+
+.metadata {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+  gap: 8px 16px;
+}
+
+.metadata div {
+  min-width: 0;
+}
+
+.metadata dt {
+  color: #757575;
+  font-family: Inter, Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.metadata dd {
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
+  color: #1e1e1e;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.download-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 40px;
+  padding: 12px;
+  gap: 8px;
+  border: 1px solid rgba(205, 94, 20, 0.5);
+  border-radius: 8px;
+  background: rgba(255, 129, 45, 0.13);
+  color: #ba681f;
+  font-size: 16px;
+  line-height: 16px;
   cursor: pointer;
 }
 
-button:hover:not(:disabled) {
-  background: #3a3a3a;
+.download-button svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-button:focus-visible {
-  outline: 3px solid #ffffff;
-  outline-offset: 3px;
+.download-button:disabled {
+  border-color: rgba(183, 167, 156, 0.2);
+  background: rgba(183, 167, 156, 0.2);
+  color: #aea49b;
+  cursor: wait;
 }
 
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.message,
-.error {
-  margin: 0;
-  text-align: center;
-}
-
-.error {
-  color: #a40000;
-}
-
-@media (max-width: 600px) {
-
-  .page {
-    padding: 20px;
+@media (max-width: 767px) {
+  .download-card {
+    width: min(345px, 100%);
+    min-height: 280px;
   }
 
-  .card {
-    margin-top: 80px;
-    padding: 24px;
+  .download-card.error-state {
+    min-height: 160px;
   }
 
-  .info-row {
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .info-row strong {
-    text-align: left;
+  .metadata {
+    grid-template-columns: 1fr;
   }
 }

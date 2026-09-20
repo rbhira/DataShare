@@ -1,27 +1,45 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectorRef,
   Component
 } from '@angular/core';
-
-import { FormsModule } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators
+} from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../services/auth.service';
+import { AuthShell } from '../../../shared/auth-shell/auth-shell';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [
-    FormsModule,
-    RouterLink
+    ReactiveFormsModule,
+    RouterLink,
+    AuthShell
   ],
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
 export class Login {
 
-  email = '';
-  password = '';
+  readonly loginForm = new FormGroup({
+    email: new FormControl('', {
+      nonNullable: true,
+      validators: [
+        Validators.required,
+        Validators.email
+      ]
+    }),
+    password: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required]
+    })
+  });
 
   loading = false;
   errorMessage = '';
@@ -32,41 +50,56 @@ export class Login {
     private router: Router,
     private changeDetectorRef: ChangeDetectorRef
   ) {
-    if (history.state.accountCreated) {
+    if (history.state?.accountCreated) {
       this.successMessage =
         'Compte créé. Vous pouvez maintenant vous connecter.';
     }
   }
 
-  submit(): void {
+  get emailInvalid(): boolean {
+    const control = this.loginForm.controls.email;
+    return control.invalid && (control.touched || control.dirty);
+  }
 
+  get passwordInvalid(): boolean {
+    const control = this.loginForm.controls.password;
+    return control.invalid && (control.touched || control.dirty);
+  }
+
+  get emailErrorMessage(): string {
+    const control = this.loginForm.controls.email;
+
+    if (control.hasError('required')) {
+      return 'Veuillez saisir votre email.';
+    }
+
+    return 'Veuillez saisir une adresse email valide.';
+  }
+
+  submit(): void {
     this.errorMessage = '';
 
-    if (!this.email || !this.password) {
-      this.errorMessage =
-        'Veuillez renseigner votre email et votre mot de passe.';
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
       return;
     }
 
     this.loading = true;
 
-    this.authService.login(
-      this.email,
-      this.password
-    ).subscribe({
+    const { email, password } = this.loginForm.getRawValue();
 
+    this.authService.login(email, password).subscribe({
       next: () => {
         this.loading = false;
         this.router.navigate(['/upload']);
       },
 
-      error: error => {
+      error: (error: HttpErrorResponse) => {
         this.errorMessage =
           error.error?.message ??
           'Connexion impossible.';
 
         this.loading = false;
-
         this.changeDetectorRef.detectChanges();
       }
     });

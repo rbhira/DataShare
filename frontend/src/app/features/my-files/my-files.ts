@@ -35,7 +35,9 @@ export class MyFiles {
   loading = true;
   errorMessage = '';
 
-  selectedFilter: FileFilter = 'active';
+  selectedFilter: FileFilter = 'all';
+
+  mobileMenuOpen = false;
 
   constructor(
     private authService: AuthService,
@@ -104,6 +106,14 @@ export class MyFiles {
     this.selectedFilter = filter;
   }
 
+  openMobileMenu(): void {
+    this.mobileMenuOpen = true;
+  }
+
+  closeMobileMenu(): void {
+    this.mobileMenuOpen = false;
+  }
+
   accessFile(file: FileHistoryItem): void {
 
     if (file.expired) {
@@ -117,10 +127,12 @@ export class MyFiles {
   }
 
   addFiles(): void {
+    this.mobileMenuOpen = false;
     this.router.navigate(['/upload']);
   }
 
   logout(): void {
+    this.mobileMenuOpen = false;
     this.authService.logout();
     this.router.navigate(['/login']);
   }

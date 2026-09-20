@@ -1,92 +1,131 @@
-<main class="upload-page">
+<app-auth-shell
+  actionLabel="Mon espace"
+  actionLink="/my-files"
+>
+  <section
+    class="upload-card"
+    [class.upload-complete]="uploadedFile"
+    aria-labelledby="upload-title"
+  >
+    <h1 id="upload-title">Ajouter un fichier</h1>
 
-  <section class="upload-card">
+    @if (!uploadedFile) {
+      <div class="selected-file-row">
+        <div class="file-summary">
+          <svg class="file-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 2.75h8l4 4V21.25H6z" />
+            <path d="M14 2.75v4h4" />
+          </svg>
 
-    <h1>DataShare</h1>
+          <div class="file-copy">
+            <strong>
+              {{ selectedFile?.name || 'Sélectionne un fichier' }}
+            </strong>
+            @if (selectedFile) {
+              <span>{{ formatSize(selectedFile.size) }}</span>
+            }
+          </div>
+        </div>
 
-    <p class="subtitle">
-      Sélectionnez un fichier à envoyer
-    </p>
+        <label class="change-file-button" for="upload-file">
+          {{ selectedFile ? 'Changer' : 'Choisir' }}
+        </label>
 
-    <label class="file-zone">
-
-      <span>
-        Sélectionner un fichier
-      </span>
-
-      <input
-        type="file"
-        (change)="onFileSelected($event)"
-      />
-
-    </label>
-
-    @if (selectedFile) {
-      <p class="file-name">
-        {{ selectedFile.name }}
-        - {{ selectedFile.size }} octets
-      </p>
-    }
-
-    <div class="expiration">
-
-      <label for="expiresAt">
-        Date d'expiration facultative
-      </label>
-
-      <input
-        id="expiresAt"
-        type="datetime-local"
-        (change)="onExpirationChanged($event)"
-      />
-
-      <small>
-        Sans choix, le fichier expirera automatiquement
-        après 7 jours.
-      </small>
-
-    </div>
-
-    <button
-      type="button"
-      (click)="upload()"
-      [disabled]="loading"
-    >
-      {{ loading ? 'Envoi en cours...' : 'Envoyer le fichier' }}
-    </button>
-
-    @if (successMessage) {
-      <p class="success">
-        {{ successMessage }}
-      </p>
-    }
-
-    @if (errorMessage) {
-      <p class="error">
-        {{ errorMessage }}
-      </p>
-    }
-
-    @if (uploadedFile) {
-
-      <div class="result">
-
-        <strong>
-          {{ uploadedFile.originalName }}
-        </strong>
-
-        <span>
-          Taille : {{ uploadedFile.size }} octets
-        </span>
-
-        <span>
-          Expiration :
-          {{ uploadedFile.expiresAt }}
-        </span>
-
+        <input
+          id="upload-file"
+          class="visually-hidden"
+          type="file"
+          (change)="onFileSelected($event)"
+        />
       </div>
+
+      <div class="field">
+        <label for="upload-expiration">Expiration</label>
+        <select
+          id="upload-expiration"
+          [value]="expirationDays"
+          (change)="onExpirationChanged($event)"
+        >
+          <option value="1">Une journée</option>
+          <option value="3">3 jours</option>
+          <option value="7">Une semaine</option>
+        </select>
+      </div>
+
+      @if (errorMessage) {
+        <p class="callout callout-error" role="alert">
+          <span aria-hidden="true">!</span>
+          {{ errorMessage }}
+        </p>
+      }
+
+      <button
+        class="primary-button"
+        type="button"
+        (click)="upload()"
+        [disabled]="loading || !selectedFile"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7.5 18.5H6.25a4.25 4.25 0 0 1-.68-8.45A6.25 6.25 0 0 1 17.7 8.12a5 5 0 0 1 .05 9.98H16.5" />
+          <path d="M12 18V10.5" />
+          <path d="m8.9 13.6 3.1-3.1 3.1 3.1" />
+        </svg>
+        {{ loading ? 'Téléversement...' : 'Téléverser' }}
+      </button>
+    } @else {
+      <div class="selected-file-row success-file-row">
+        <div class="file-summary">
+          <svg class="file-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 2.75h8l4 4V21.25H6z" />
+            <path d="M14 2.75v4h4" />
+          </svg>
+          <div class="file-copy">
+            <strong>{{ uploadedFile.originalName }}</strong>
+            <span>{{ formatSize(uploadedFile.size) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="success-copy">
+        Félicitations, ton fichier sera conservé chez nous pendant
+        {{ expirationDays === 1 ? 'une journée' : expirationDays === 7 ? 'une semaine' : expirationDays + ' jours' }} !
+      </p>
+
+      <div class="link-field">
+        <label for="download-link">Lien de téléchargement</label>
+        <input
+          id="download-link"
+          type="text"
+          [value]="downloadUrl"
+          readonly
+        />
+      </div>
+
+      @if (linkCopied) {
+        <p class="callout callout-info" role="status">
+          <span aria-hidden="true">i</span>
+          Lien copié dans le presse-papiers.
+        </p>
+      }
+
+      @if (errorMessage) {
+        <p class="callout callout-error" role="alert">
+          <span aria-hidden="true">!</span>
+          {{ errorMessage }}
+        </p>
+      }
+
+      <button
+        class="primary-button"
+        type="button"
+        (click)="copyDownloadLink()"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="8" y="8" width="10" height="10" rx="2" />
+          <path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1" />
+        </svg>
+        Copier le lien
+      </button>
     }
-
   </section>
-
-</main>
+</app-auth-shell>
