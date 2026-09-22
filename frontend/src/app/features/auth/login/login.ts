@@ -77,6 +77,10 @@ export class Login {
   }
 
   submit(): void {
+    if (this.loading) {
+      return;
+    }
+
     this.errorMessage = '';
 
     if (this.loginForm.invalid) {
@@ -95,9 +99,14 @@ export class Login {
       },
 
       error: (error: HttpErrorResponse) => {
-        this.errorMessage =
-          error.error?.message ??
-          'Connexion impossible.';
+        if (error.status === 0) {
+          this.errorMessage =
+            'Connexion réseau indisponible. Vérifiez votre connexion puis réessayez.';
+        } else {
+          this.errorMessage =
+            error.error?.message ??
+            'Connexion impossible.';
+        }
 
         this.loading = false;
         this.changeDetectorRef.detectChanges();

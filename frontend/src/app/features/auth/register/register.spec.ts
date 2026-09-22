@@ -1,6 +1,7 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
-import { of } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 
 import { AuthService } from '../../../services/auth.service';
 import { Register } from './register';
@@ -87,6 +88,7 @@ describe('Register', () => {
       'user@datashare.test',
       'MotDePasse123'
     );
+
     expect(navigateSpy).toHaveBeenCalledWith(
       ['/login'],
       {
@@ -95,5 +97,58 @@ describe('Register', () => {
         }
       }
     );
+  });
+
+  it('ignore une seconde soumission pendant une creation en cours', () => {
+    const pendingRegister = new Subject<{
+      id: number;
+      email: string;
+      createdAt: string;
+    }>();
+
+    authServiceMock.register.mockReturnValue(pendingRegister);
+
+    const fixture = TestBed.createComponent(Register);
+    const component = fixture.componentInstance;
+
+    component.registerForm.setValue({
+      email: 'user@datashare.test',
+      password: 'MotDePasse123',
+      confirmPassword: 'MotDePasse123'
+    });
+
+    component.submit();
+    component.submit();
+
+    expect(authServiceMock.register).toHaveBeenCalledTimes(1);
+    expect(component.loading).toBe(true);
+  });
+
+  it('affiche un message explicite en cas de perte reseau', () => {
+    authServiceMock.register.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 0,
+            statusText: 'Unknown Error'
+          })
+      )
+    );
+
+    const fixture = TestBed.createComponent(Register);
+    const component = fixture.componentInstance;
+
+    component.registerForm.setValue({
+      email: 'user@datashare.test',
+      password: 'MotDePasse123',
+      confirmPassword: 'MotDePasse123'
+    });
+
+    component.submit();
+
+    expect(component.errorMessage).toBe(
+      'Connexion réseau indisponible. Vérifiez votre connexion puis réessayez.'
+    );
+    expect(component.loading).toBe(false);
   });
 });

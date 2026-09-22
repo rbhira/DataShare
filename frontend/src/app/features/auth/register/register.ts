@@ -129,6 +129,10 @@ export class Register {
   }
 
   submit(): void {
+    if (this.loading) {
+      return;
+    }
+
     this.errorMessage = '';
 
     if (this.registerForm.invalid) {
@@ -154,9 +158,14 @@ export class Register {
       },
 
       error: (error: HttpErrorResponse) => {
-        this.errorMessage =
-          error.error?.message ??
-          'Création du compte impossible.';
+        if (error.status === 0) {
+          this.errorMessage =
+            'Connexion réseau indisponible. Vérifiez votre connexion puis réessayez.';
+        } else {
+          this.errorMessage =
+            error.error?.message ??
+            'Création du compte impossible.';
+        }
 
         this.loading = false;
         this.changeDetectorRef.detectChanges();

@@ -1,4 +1,5 @@
 import { ChangeDetectorRef } from '@angular/core';
+import { Subject, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AuthService } from '../../services/auth.service';
@@ -9,22 +10,30 @@ describe('Upload', () => {
 
   let component: Upload;
 
-  beforeEach(() => {
-    const fileUploadService = {
-      upload: vi.fn()
-    } as unknown as FileUploadService;
+  let fileUploadServiceMock: {
+    upload: ReturnType<typeof vi.fn>;
+  };
 
-    const authService = {
+  let authServiceMock: {
+    getToken: ReturnType<typeof vi.fn>;
+  };
+
+  beforeEach(() => {
+    fileUploadServiceMock = {
+      upload: vi.fn()
+    };
+
+    authServiceMock = {
       getToken: vi.fn()
-    } as unknown as AuthService;
+    };
 
     const changeDetectorRef = {
       detectChanges: vi.fn()
     } as unknown as ChangeDetectorRef;
 
     component = new Upload(
-      fileUploadService,
-      authService,
+      fileUploadServiceMock as unknown as FileUploadService,
+      authServiceMock as unknown as AuthService,
       changeDetectorRef
     );
   });
@@ -108,5 +117,61 @@ describe('Upload', () => {
 
     expect(component.errorMessage)
       .toBe('');
+  });
+
+  it('ignore un second envoi pendant un upload en cours', () => {
+    const pendingUpload = new Subject<unknown>();
+
+    fileUploadServiceMock.upload.mockReturnValue(
+      pendingUpload
+    );
+
+    authServiceMock.getToken.mockReturnValue(
+      'jwt-test'
+    );
+
+    const { event } =
+      selectFile('rapport.pdf', 100);
+
+    component.onFileSelected(event);
+
+    component.upload();
+    component.upload();
+
+    expect(fileUploadServiceMock.upload)
+      .toHaveBeenCalledTimes(1);
+
+    expect(component.loading)
+      .toBe(true);
+  });
+
+  it('affiche un message explicite en cas de perte reseau', () => {
+    fileUploadServiceMock.upload.mockReturnValue(
+      throwError(
+        () => ({
+          status: 0,
+          error: null
+        })
+      )
+    );
+
+    authServiceMock.getToken.mockReturnValue(
+      'jwt-test'
+    );
+
+    const { event } =
+      selectFile('rapport.pdf', 100);
+
+    component.onFileSelected(event);
+
+    component.upload();
+
+    expect(component.errorMessage)
+      .toBe(
+        'Connexion réseau indisponible. Vérifiez votre connexion puis réessayez.'
+      );
+
+    expect(component.loading)
+      .toBe(false);
   });
 });
