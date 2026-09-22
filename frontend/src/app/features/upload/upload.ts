@@ -85,6 +85,10 @@ export class Upload {
   }
 
   upload(): void {
+    if (this.loading) {
+      return;
+    }
+
     this.successMessage = '';
     this.errorMessage = '';
     this.uploadedFile = null;
@@ -119,9 +123,15 @@ export class Upload {
         this.changeDetectorRef.detectChanges();
       },
       error: error => {
-        this.errorMessage =
-          error.error?.message ??
-          'Une erreur est survenue pendant l’envoi.';
+        if (error.status === 0) {
+          this.errorMessage =
+            'Connexion réseau indisponible. Vérifiez votre connexion puis réessayez.';
+        } else {
+          this.errorMessage =
+            error.error?.message ??
+            'Une erreur est survenue pendant l’envoi.';
+        }
+
         this.loading = false;
         this.changeDetectorRef.detectChanges();
       }
