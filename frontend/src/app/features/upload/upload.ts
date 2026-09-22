@@ -19,7 +19,18 @@ import { AuthShell } from '../../shared/auth-shell/auth-shell';
 })
 export class Upload {
 
-  private readonly maxFileSize = 1024 * 1024 * 1024;
+  private readonly maxFileSize = 1_000_000_000;
+
+  private readonly forbiddenExtensions = [
+    '.exe',
+    '.bat',
+    '.cmd',
+    '.com',
+    '.msi',
+    '.ps1',
+    '.vbs',
+    '.scr'
+  ];
 
   selectedFile: File | null = null;
   expirationDays = 7;
@@ -54,6 +65,14 @@ export class Upload {
       input.value = '';
       this.errorMessage =
         'La taille des fichiers est limitée à 1 Go.';
+      return;
+    }
+
+    if (file && this.hasForbiddenExtension(file.name)) {
+      this.selectedFile = null;
+      input.value = '';
+      this.errorMessage =
+        'Ce type de fichier est interdit.';
       return;
     }
 
@@ -147,6 +166,14 @@ export class Upload {
     }
 
     return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} Go`;
+  }
+
+  private hasForbiddenExtension(fileName: string): boolean {
+    const lowerCaseName = fileName.toLowerCase();
+
+    return this.forbiddenExtensions.some(
+      extension => lowerCaseName.endsWith(extension)
+    );
   }
 
   private buildExpirationDate(): string {
