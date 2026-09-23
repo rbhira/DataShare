@@ -122,4 +122,49 @@ describe('Download', () => {
     expect(component.errorMessage)
       .toBe('Lien de téléchargement invalide.');
   });
+
+  it('formate les tailles de fichier', () => {
+    expect(component.formatSize(500))
+      .toBe('500 octets');
+
+    expect(component.formatSize(1536))
+      .toBe('1.5 Ko');
+
+    expect(component.formatSize(2 * 1024 * 1024))
+      .toBe('2.0 Mo');
+
+    expect(
+      component.formatSize(
+        2 * 1024 * 1024 * 1024
+      )
+    ).toBe('2.0 Go');
+  });
+
+  it('affiche une erreur si le fichier disparait pendant le telechargement', () => {
+    component.token = 'valid-token';
+
+    component.fileInfo = {
+      originalName: 'rapport.pdf',
+      mimeType: 'application/pdf',
+      size: 1500,
+      expiresAt: '2026-09-30T18:00:00'
+    };
+
+    downloadFile.mockReturnValue(
+      throwError(() => ({
+        status: 404
+      }))
+    );
+
+    component.download();
+
+    expect(downloadFile)
+      .toHaveBeenCalledWith('valid-token');
+
+    expect(component.downloading)
+      .toBe(false);
+
+    expect(component.errorMessage)
+      .toBe('Le fichier est introuvable.');
+  });
 });
