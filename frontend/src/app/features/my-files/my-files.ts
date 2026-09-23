@@ -4,6 +4,8 @@ import {
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
+
 import {
   Router,
   RouterLink
@@ -35,9 +37,11 @@ export class MyFiles {
   loading = true;
   errorMessage = '';
 
-  selectedFilter: FileFilter = 'all';
+  selectedFilter: FileFilter = 'active';
 
   mobileMenuOpen = false;
+
+  deletingFileIds = new Set<number>();
 
   constructor(
     private authService: AuthService,
@@ -124,6 +128,79 @@ export class MyFiles {
       '/download',
       file.downloadToken
     ]);
+  }
+
+  deleteFile(file: FileHistoryItem): void {
+
+    if (
+      file.expired ||
+      this.deletingFileIds.has(file.id)
+    ) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Supprimer définitivement « ${file.originalName} » ?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    const token = this.authService.getToken();
+
+    if (!token) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    this.errorMessage = '';
+    this.deletingFileIds.add(file.id);
+
+    this.fileHistoryService
+      .deleteFile(file.id, token)
+      .subscribe({
+
+        next: () => {
+          this.files =
+            this.files.filter(
+              currentFile =>
+                currentFile.id !== file.id
+            );
+
+          this.deletingFileIds.delete(file.id);
+
+          this.changeDetectorRef.detectChanges();
+        },
+
+        error: (error: HttpErrorResponse) => {
+
+          this.deletingFileIds.delete(file.id);
+
+          if (error.status === 401) {
+            this.authService.logout();
+            this.router.navigate(['/login']);
+            return;
+          }
+
+          if (error.status === 0) {
+            this.errorMessage =
+              'Connexion réseau indisponible. Vérifiez votre connexion puis réessayez.';
+          } else if (error.status === 404) {
+            this.errorMessage =
+              'Ce fichier n’existe plus ou a déjà été supprimé.';
+          } else {
+            this.errorMessage =
+              'Impossible de supprimer ce fichier.';
+          }
+
+          this.changeDetectorRef.detectChanges();
+        }
+      });
+  }
+
+  isDeleting(fileId: number): boolean {
+    return this.deletingFileIds.has(fileId);
   }
 
   addFiles(): void {
