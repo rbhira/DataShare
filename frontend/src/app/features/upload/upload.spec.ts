@@ -1,5 +1,5 @@
 import { ChangeDetectorRef } from '@angular/core';
-import { Subject, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AuthService } from '../../services/auth.service';
@@ -143,6 +143,58 @@ describe('Upload', () => {
 
     expect(component.loading)
       .toBe(true);
+  });
+
+  it('met a jour la duree d expiration selectionnee', () => {
+    const event = {
+      target: {
+        value: '3'
+      }
+    } as unknown as Event;
+
+    component.onExpirationChanged(event);
+
+    expect(component.expirationDays)
+      .toBe(3);
+  });
+
+  it('finalise un upload reussi et genere le lien de telechargement', () => {
+    fileUploadServiceMock.upload.mockReturnValue(
+      of({
+        id: 42,
+        originalName: 'rapport.pdf',
+        size: 100,
+        mimeType: 'application/pdf',
+        downloadToken: 'token-test',
+        uploadedAt: '2026-09-23T18:00:00',
+        expiresAt: '2026-09-30T18:00:00'
+      })
+    );
+
+    authServiceMock.getToken.mockReturnValue(
+      'jwt-test'
+    );
+
+    const { event } =
+      selectFile('rapport.pdf', 100);
+
+    component.onFileSelected(event);
+    component.upload();
+
+    expect(component.loading)
+      .toBe(false);
+
+    expect(component.successMessage)
+      .toBe('Fichier envoyé avec succès.');
+
+    expect(component.uploadedFile?.downloadToken)
+      .toBe('token-test');
+
+    expect(component.downloadUrl)
+      .toContain('/download/token-test');
+
+    expect(component.formatSize(1500))
+      .toBe('1.5 Ko');
   });
 
   it('affiche un message explicite en cas de perte reseau', () => {
