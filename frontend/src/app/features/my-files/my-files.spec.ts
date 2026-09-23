@@ -1,6 +1,6 @@
 import { ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AuthService } from '../../services/auth.service';
@@ -19,6 +19,7 @@ describe('MyFiles', () => {
 
   let fileHistoryServiceMock: {
     getHistory: ReturnType<typeof vi.fn>;
+    deleteFile: ReturnType<typeof vi.fn>;
   };
 
   let routerMock: {
@@ -56,7 +57,8 @@ describe('MyFiles', () => {
     };
 
     fileHistoryServiceMock = {
-      getHistory: vi.fn()
+      getHistory: vi.fn(),
+      deleteFile: vi.fn()
     };
 
     routerMock = {
@@ -161,6 +163,262 @@ describe('MyFiles', () => {
         '/download',
         'token-expired'
     ]);
+  });
+
+  it('affiche les fichiers actifs par defaut', () => {
+    authServiceMock.getToken.mockReturnValue('jwt-test');
+
+    fileHistoryServiceMock.getHistory.mockReturnValue(
+      of([activeFile, expiredFile])
+    );
+
+    const component = createComponent();
+
+    expect(component.selectedFilter)
+      .toBe('active');
+
+    expect(component.filteredFiles)
+      .toEqual([activeFile]);
+  });
+
+  it('annule la suppression lorsque l utilisateur refuse la confirmation', () => {
+    authServiceMock.getToken.mockReturnValue('jwt-test');
+
+    fileHistoryServiceMock.getHistory.mockReturnValue(
+      of([activeFile])
+    );
+
+    const component = createComponent();
+
+    const confirmSpy = vi
+      .spyOn(window, 'confirm')
+      .mockReturnValue(false);
+
+    component.deleteFile(activeFile);
+
+    expect(confirmSpy)
+      .toHaveBeenCalledWith(
+        'Supprimer définitivement « rapport.pdf » ?'
+      );
+
+    expect(fileHistoryServiceMock.deleteFile)
+      .not.toHaveBeenCalled();
+
+    expect(component.files)
+      .toEqual([activeFile]);
+
+    confirmSpy.mockRestore();
+  });
+
+  it('supprime un fichier actif apres confirmation', () => {
+    authServiceMock.getToken.mockReturnValue('jwt-test');
+
+    fileHistoryServiceMock.getHistory.mockReturnValue(
+      of([activeFile, expiredFile])
+    );
+
+    fileHistoryServiceMock.deleteFile.mockReturnValue(
+      of(void 0)
+    );
+
+    const component = createComponent();
+
+    const confirmSpy = vi
+      .spyOn(window, 'confirm')
+      .mockReturnValue(true);
+
+    component.deleteFile(activeFile);
+
+    expect(confirmSpy)
+      .toHaveBeenCalledWith(
+        'Supprimer définitivement « rapport.pdf » ?'
+      );
+
+    expect(fileHistoryServiceMock.deleteFile)
+      .toHaveBeenCalledTimes(1);
+
+    expect(fileHistoryServiceMock.deleteFile)
+      .toHaveBeenCalledWith(
+        1,
+        'jwt-test'
+      );
+
+    expect(component.files)
+      .toEqual([expiredFile]);
+
+    expect(component.isDeleting(1))
+      .toBe(false);
+
+    confirmSpy.mockRestore();
+  });
+
+  it('refuse la suppression d un fichier expire', () => {
+    authServiceMock.getToken.mockReturnValue('jwt-test');
+
+    fileHistoryServiceMock.getHistory.mockReturnValue(
+      of([expiredFile])
+    );
+
+    const component = createComponent();
+
+    const confirmSpy = vi.spyOn(window, 'confirm');
+
+    component.deleteFile(expiredFile);
+
+    expect(confirmSpy)
+      .not.toHaveBeenCalled();
+
+    expect(fileHistoryServiceMock.deleteFile)
+      .not.toHaveBeenCalled();
+
+    expect(component.files)
+      .toEqual([expiredFile]);
+
+    confirmSpy.mockRestore();
+  });
+
+  it('ignore un second clic pendant une suppression en cours', () => {
+    authServiceMock.getToken.mockReturnValue('jwt-test');
+
+    fileHistoryServiceMock.getHistory.mockReturnValue(
+      of([activeFile])
+    );
+
+    let completeDelete!: () => void;
+
+    fileHistoryServiceMock.deleteFile.mockReturnValue(
+      new Observable<void>((subscriber) => {
+        completeDelete = () => {
+          subscriber.next();
+          subscriber.complete();
+        };
+      })
+    );
+
+    const component = createComponent();
+
+    const confirmSpy = vi
+      .spyOn(window, 'confirm')
+      .mockReturnValue(true);
+
+    component.deleteFile(activeFile);
+    component.deleteFile(activeFile);
+
+    expect(fileHistoryServiceMock.deleteFile)
+      .toHaveBeenCalledTimes(1);
+
+    expect(component.isDeleting(1))
+      .toBe(true);
+
+    completeDelete();
+
+    expect(component.isDeleting(1))
+      .toBe(false);
+
+    confirmSpy.mockRestore();
+  });
+
+  it('deconnecte l utilisateur si la suppression renvoie 401', () => {
+    authServiceMock.getToken.mockReturnValue('jwt-test');
+
+    fileHistoryServiceMock.getHistory.mockReturnValue(
+      of([activeFile])
+    );
+
+    fileHistoryServiceMock.deleteFile.mockReturnValue(
+      throwError(() => ({
+        status: 401
+      }))
+    );
+
+    const component = createComponent();
+
+    const confirmSpy = vi
+      .spyOn(window, 'confirm')
+      .mockReturnValue(true);
+
+    component.deleteFile(activeFile);
+
+    expect(authServiceMock.logout)
+      .toHaveBeenCalledTimes(1);
+
+    expect(routerMock.navigate)
+      .toHaveBeenCalledWith(['/login']);
+
+    expect(component.isDeleting(1))
+      .toBe(false);
+
+    confirmSpy.mockRestore();
+  });
+
+  it('affiche une erreur reseau si la suppression echoue sans connexion', () => {
+    authServiceMock.getToken.mockReturnValue('jwt-test');
+
+    fileHistoryServiceMock.getHistory.mockReturnValue(
+      of([activeFile])
+    );
+
+    fileHistoryServiceMock.deleteFile.mockReturnValue(
+      throwError(() => ({
+        status: 0
+      }))
+    );
+
+    const component = createComponent();
+
+    const confirmSpy = vi
+      .spyOn(window, 'confirm')
+      .mockReturnValue(true);
+
+    component.deleteFile(activeFile);
+
+    expect(component.errorMessage)
+      .toBe(
+        'Connexion réseau indisponible. Vérifiez votre connexion puis réessayez.'
+      );
+
+    expect(component.files)
+      .toEqual([activeFile]);
+
+    expect(component.isDeleting(1))
+      .toBe(false);
+
+    confirmSpy.mockRestore();
+  });
+
+  it('affiche un message si le fichier n existe plus', () => {
+    authServiceMock.getToken.mockReturnValue('jwt-test');
+
+    fileHistoryServiceMock.getHistory.mockReturnValue(
+      of([activeFile])
+    );
+
+    fileHistoryServiceMock.deleteFile.mockReturnValue(
+      throwError(() => ({
+        status: 404
+      }))
+    );
+
+    const component = createComponent();
+
+    const confirmSpy = vi
+      .spyOn(window, 'confirm')
+      .mockReturnValue(true);
+
+    component.deleteFile(activeFile);
+
+    expect(component.errorMessage)
+      .toBe(
+        'Ce fichier n’existe plus ou a déjà été supprimé.'
+      );
+
+    expect(component.files)
+      .toEqual([activeFile]);
+
+    expect(component.isDeleting(1))
+      .toBe(false);
+
+    confirmSpy.mockRestore();
   });
 
   it('filtre les fichiers actifs et expires', () => {

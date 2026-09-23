@@ -32,4 +32,19 @@ export class FileHistoryService {
       { headers }
     );
   }
+
+  deleteFile(
+    fileId: number,
+    token: string
+  ): Observable<void> {
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+
+    return this.http.delete<void>(
+      `${this.apiUrl}/${fileId}`,
+      { headers }
+    );
+  }
 }

@@ -275,6 +275,7 @@ h1 {
   gap: 8px;
 }
 
+.delete-button,
 .access-button {
   display: inline-flex;
   height: 32px;
@@ -288,9 +289,17 @@ h1 {
   color: #e27f29;
   font-size: 16px;
   line-height: 16px;
+  white-space: nowrap;
   cursor: pointer;
 }
 
+.delete-button:disabled,
+.access-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.delete-icon,
 .arrow-icon {
   width: 16px;
   height: 16px;
@@ -428,11 +437,13 @@ h1 {
     display: none;
   }
 
+  .delete-button,
   .access-button {
     width: 32px;
     padding: 8px;
   }
 
+  .delete-label,
   .access-label {
     position: absolute;
     width: 1px;

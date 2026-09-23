@@ -146,12 +146,45 @@
               @if (!file.expired) {
                 <button
                   type="button"
+                  class="delete-button"
+                  (click)="deleteFile(file)"
+                  [disabled]="isDeleting(file.id)"
+                  [attr.aria-label]="
+                    isDeleting(file.id)
+                      ? 'Suppression du fichier ' + file.originalName
+                      : 'Supprimer le fichier ' + file.originalName
+                  "
+                >
+                  <svg
+                    class="delete-icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M9 7V4h6v3" />
+                    <path d="M6.5 7l1 13h9l1-13" />
+                    <path d="M10 11v5M14 11v5" />
+                  </svg>
+
+                  <span class="delete-label">
+                    {{ isDeleting(file.id) ? 'Suppression...' : 'Supprimer' }}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
                   class="access-button"
                   (click)="accessFile(file)"
+                  [disabled]="isDeleting(file.id)"
                   [attr.aria-label]="'Accéder au fichier ' + file.originalName"
                 >
                   <span class="access-label">Accéder</span>
-                  <svg class="arrow-icon" viewBox="0 0 24 24" aria-hidden="true">
+
+                  <svg
+                    class="arrow-icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
                     <path d="M5 12h13" />
                     <path d="m13 7 5 5-5 5" />
                   </svg>
