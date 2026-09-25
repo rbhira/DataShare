@@ -112,7 +112,7 @@
   height: 32px;
   padding: 8px 12px;
   gap: 8px;
-  color: #e27f29;
+  color: #9a5015;
 }
 
 .logout-action svg {
@@ -185,7 +185,7 @@ h1 {
 
 .filters button.active {
   background: #e77a6e;
-  color: #ffffff;
+  color: #1e1e1e;
 }
 
 .status,
@@ -286,7 +286,7 @@ h1 {
   border: 1px solid #ffa569;
   border-radius: 8px;
   background: transparent;
-  color: #e27f29;
+  color: #9a5015;
   font-size: 16px;
   line-height: 16px;
   white-space: nowrap;

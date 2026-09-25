@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 
+import { authGuard } from './auth.guard';
 import { Welcome } from './features/auth/welcome/welcome';
 import { Login } from './features/auth/login/login';
 import { Register } from './features/auth/register/register';
@@ -22,7 +23,8 @@ export const routes: Routes = [
   },
   {
     path: 'upload',
-    component: Upload
+    component: Upload,
+    canActivate: [authGuard]
   },
   {
     path: 'download/:token',
@@ -30,7 +32,8 @@ export const routes: Routes = [
   },
   {
     path: 'my-files',
-    component: MyFiles
+    component: MyFiles,
+    canActivate: [authGuard]
   },
   {
     path: '**',

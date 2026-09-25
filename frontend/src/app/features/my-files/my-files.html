@@ -13,12 +13,17 @@
     </footer>
   </aside>
 
-  <div class="workspace-main">
+  <div
+    class="workspace-main"
+    [attr.aria-hidden]="mobileMenuOpen ? 'true' : null"
+  >
     <header class="workspace-header">
       <button
+        #mobileMenuButton
         type="button"
         class="mobile-menu-button"
         aria-label="Ouvrir le menu"
+        aria-controls="mobile-navigation-drawer"
         [attr.aria-expanded]="mobileMenuOpen"
         (click)="openMobileMenu()"
       >
@@ -129,12 +134,14 @@
 
             <div class="file-info">
               <strong class="file-name">{{ file.originalName }}</strong>
+
               <span
                 class="expiration"
                 [class.expired-text]="file.expired"
               >
                 {{ expirationText(file) }}
               </span>
+
               <span class="file-metadata">
                 {{ formatSize(file.size) }} · envoyé le
                 {{ file.uploadedAt | date:'dd/MM/yyyy' }} · expiration le
@@ -205,13 +212,22 @@
     <button
       type="button"
       class="drawer-backdrop"
-      aria-label="Fermer le menu"
+      aria-hidden="true"
+      tabindex="-1"
       (click)="closeMobileMenu()"
     ></button>
 
-    <aside class="mobile-drawer" aria-label="Menu mobile">
+    <aside
+      #mobileDrawer
+      id="mobile-navigation-drawer"
+      class="mobile-drawer"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Menu mobile"
+    >
       <div class="drawer-header">
         <button
+          #drawerCloseButton
           type="button"
           class="drawer-close"
           aria-label="Fermer le menu"
@@ -221,6 +237,7 @@
             <path d="m6 6 12 12M18 6 6 18" />
           </svg>
         </button>
+
         <span class="drawer-brand">DataShare</span>
       </div>
 
@@ -234,11 +251,19 @@
           Mes fichiers
         </a>
 
-        <button type="button" class="drawer-action" (click)="addFiles()">
+        <button
+          type="button"
+          class="drawer-action"
+          (click)="addFiles()"
+        >
           Ajouter des fichiers
         </button>
 
-        <button type="button" class="drawer-action" (click)="logout()">
+        <button
+          type="button"
+          class="drawer-action"
+          (click)="logout()"
+        >
           Déconnexion
         </button>
       </nav>

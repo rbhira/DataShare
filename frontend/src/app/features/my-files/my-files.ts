@@ -1,11 +1,12 @@
-import {
-  ChangeDetectorRef,
-  Component
-} from '@angular/core';
-
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-
+import {
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  HostListener,
+  ViewChild
+} from '@angular/core';
 import {
   Router,
   RouterLink
@@ -31,6 +32,15 @@ type FileFilter = 'all' | 'active' | 'expired';
   styleUrl: './my-files.css'
 })
 export class MyFiles {
+
+  @ViewChild('mobileMenuButton')
+  private mobileMenuButton?: ElementRef<HTMLButtonElement>;
+
+  @ViewChild('mobileDrawer')
+  private mobileDrawer?: ElementRef<HTMLElement>;
+
+  @ViewChild('drawerCloseButton')
+  private drawerCloseButton?: ElementRef<HTMLButtonElement>;
 
   files: FileHistoryItem[] = [];
 
@@ -111,11 +121,49 @@ export class MyFiles {
   }
 
   openMobileMenu(): void {
+
+    if (this.mobileMenuOpen) {
+      return;
+    }
+
     this.mobileMenuOpen = true;
+    this.changeDetectorRef.detectChanges();
+
+    queueMicrotask(() => {
+      this.drawerCloseButton?.nativeElement.focus();
+    });
   }
 
   closeMobileMenu(): void {
+
+    if (!this.mobileMenuOpen) {
+      return;
+    }
+
     this.mobileMenuOpen = false;
+    this.changeDetectorRef.detectChanges();
+
+    queueMicrotask(() => {
+      this.mobileMenuButton?.nativeElement.focus();
+    });
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleDocumentKeydown(event: KeyboardEvent): void {
+
+    if (!this.mobileMenuOpen) {
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.closeMobileMenu();
+      return;
+    }
+
+    if (event.key === 'Tab') {
+      this.trapMobileMenuFocus(event);
+    }
   }
 
   accessFile(file: FileHistoryItem): void {
@@ -252,5 +300,55 @@ export class MyFiles {
     }
 
     return `Expire dans ${days} jours`;
+  }
+
+  private trapMobileMenuFocus(
+    event: KeyboardEvent
+  ): void {
+
+    const drawer = this.mobileDrawer?.nativeElement;
+
+    if (!drawer) {
+      return;
+    }
+
+    const focusableElements = Array.from(
+      drawer.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+    );
+
+    if (focusableElements.length === 0) {
+      return;
+    }
+
+    const firstElement = focusableElements[0];
+    const lastElement =
+      focusableElements[focusableElements.length - 1];
+
+    const activeElement = document.activeElement;
+
+    if (!activeElement || !drawer.contains(activeElement)) {
+      event.preventDefault();
+      firstElement.focus();
+      return;
+    }
+
+    if (
+      event.shiftKey &&
+      activeElement === firstElement
+    ) {
+      event.preventDefault();
+      lastElement.focus();
+      return;
+    }
+
+    if (
+      !event.shiftKey &&
+      activeElement === lastElement
+    ) {
+      event.preventDefault();
+      firstElement.focus();
+    }
   }
 }
