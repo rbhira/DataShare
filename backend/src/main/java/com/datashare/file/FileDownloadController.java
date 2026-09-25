@@ -1,6 +1,8 @@
 package com.datashare.file;
 
 import com.datashare.file.dto.FileDownloadInfoResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ContentDisposition;
@@ -19,6 +21,11 @@ import java.nio.file.Path;
 @RestController
 @RequestMapping("/api/download")
 public class FileDownloadController {
+
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(
+                    FileDownloadController.class
+            );
 
     private final FileDownloadService fileDownloadService;
 
@@ -51,6 +58,8 @@ public class FileDownloadController {
     public ResponseEntity<Resource> downloadFile(
             @PathVariable String token
     ) {
+
+        long startedAt = System.nanoTime();
 
         StoredFile storedFile =
                 fileDownloadService.getValidFile(token);
@@ -87,6 +96,17 @@ public class FileDownloadController {
                                 StandardCharsets.UTF_8
                         )
                         .build();
+
+        long durationMs =
+                (System.nanoTime() - startedAt)
+                        / 1_000_000;
+
+        LOGGER.info(
+                "event=file_download_ready sizeBytes={} mimeType={} durationMs={}",
+                storedFile.getSize(),
+                mediaType,
+                durationMs
+        );
 
         return ResponseEntity
                 .ok()
