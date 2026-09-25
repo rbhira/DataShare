@@ -68,6 +68,8 @@ describe('MyFiles', () => {
     changeDetectorRefMock = {
       detectChanges: vi.fn()
     };
+
+    document.body.innerHTML = '';
   });
 
   function createComponent(): MyFiles {
@@ -77,6 +79,53 @@ describe('MyFiles', () => {
       routerMock as unknown as Router,
       changeDetectorRefMock as unknown as ChangeDetectorRef
     );
+  }
+
+  function prepareConnectedComponent(): MyFiles {
+    authServiceMock.getToken.mockReturnValue('jwt-test');
+
+    fileHistoryServiceMock.getHistory.mockReturnValue(
+      of([])
+    );
+
+    return createComponent();
+  }
+
+  function setMobileElements(
+    component: MyFiles,
+    menuButton: HTMLButtonElement,
+    drawer: HTMLElement,
+    closeButton: HTMLButtonElement
+  ): void {
+    const internalComponent = component as unknown as {
+      mobileMenuButton?: {
+        nativeElement: HTMLButtonElement;
+      };
+      mobileDrawer?: {
+        nativeElement: HTMLElement;
+      };
+      drawerCloseButton?: {
+        nativeElement: HTMLButtonElement;
+      };
+    };
+
+    internalComponent.mobileMenuButton = {
+      nativeElement: menuButton
+    };
+
+    internalComponent.mobileDrawer = {
+      nativeElement: drawer
+    };
+
+    internalComponent.drawerCloseButton = {
+      nativeElement: closeButton
+    };
+  }
+
+  async function waitForMicrotask(): Promise<void> {
+    await new Promise<void>((resolve) => {
+      queueMicrotask(resolve);
+    });
   }
 
   it('redirige vers login lorsqu aucun token n est disponible', () => {
@@ -162,7 +211,7 @@ describe('MyFiles', () => {
       .not.toHaveBeenCalledWith([
         '/download',
         'token-expired'
-    ]);
+      ]);
   });
 
   it('affiche les fichiers actifs par defaut', () => {
@@ -444,5 +493,201 @@ describe('MyFiles', () => {
 
     expect(component.filteredFiles)
       .toEqual([activeFile, expiredFile]);
+  });
+
+  it('ouvre le menu mobile et place le focus sur le bouton de fermeture', async () => {
+    const component = prepareConnectedComponent();
+
+    const menuButton = document.createElement('button');
+    const drawer = document.createElement('aside');
+    const closeButton = document.createElement('button');
+
+    document.body.appendChild(menuButton);
+    drawer.appendChild(closeButton);
+    document.body.appendChild(drawer);
+
+    setMobileElements(
+      component,
+      menuButton,
+      drawer,
+      closeButton
+    );
+
+    component.openMobileMenu();
+
+    await waitForMicrotask();
+
+    expect(component.mobileMenuOpen)
+      .toBe(true);
+
+    expect(document.activeElement)
+      .toBe(closeButton);
+  });
+
+  it('ferme le menu mobile et rend le focus au bouton d ouverture', async () => {
+    const component = prepareConnectedComponent();
+
+    const menuButton = document.createElement('button');
+    const drawer = document.createElement('aside');
+    const closeButton = document.createElement('button');
+
+    document.body.appendChild(menuButton);
+    drawer.appendChild(closeButton);
+    document.body.appendChild(drawer);
+
+    setMobileElements(
+      component,
+      menuButton,
+      drawer,
+      closeButton
+    );
+
+    component.mobileMenuOpen = true;
+
+    component.closeMobileMenu();
+
+    await waitForMicrotask();
+
+    expect(component.mobileMenuOpen)
+      .toBe(false);
+
+    expect(document.activeElement)
+      .toBe(menuButton);
+  });
+
+  it('ferme le menu mobile avec la touche echap', async () => {
+    const component = prepareConnectedComponent();
+
+    const menuButton = document.createElement('button');
+    const drawer = document.createElement('aside');
+    const closeButton = document.createElement('button');
+
+    document.body.appendChild(menuButton);
+    drawer.appendChild(closeButton);
+    document.body.appendChild(drawer);
+
+    setMobileElements(
+      component,
+      menuButton,
+      drawer,
+      closeButton
+    );
+
+    component.mobileMenuOpen = true;
+
+    const event = new KeyboardEvent(
+      'keydown',
+      {
+        key: 'Escape',
+        cancelable: true
+      }
+    );
+
+    component.handleDocumentKeydown(event);
+
+    await waitForMicrotask();
+
+    expect(event.defaultPrevented)
+      .toBe(true);
+
+    expect(component.mobileMenuOpen)
+      .toBe(false);
+
+    expect(document.activeElement)
+      .toBe(menuButton);
+  });
+
+  it('maintient la navigation tabulation dans le menu mobile', () => {
+    const component = prepareConnectedComponent();
+
+    const menuButton = document.createElement('button');
+    const drawer = document.createElement('aside');
+    const closeButton = document.createElement('button');
+    const middleButton = document.createElement('button');
+    const lastButton = document.createElement('button');
+
+    drawer.appendChild(closeButton);
+    drawer.appendChild(middleButton);
+    drawer.appendChild(lastButton);
+
+    document.body.appendChild(menuButton);
+    document.body.appendChild(drawer);
+
+    setMobileElements(
+      component,
+      menuButton,
+      drawer,
+      closeButton
+    );
+
+    component.mobileMenuOpen = true;
+
+    lastButton.focus();
+
+    const forwardTab = new KeyboardEvent(
+      'keydown',
+      {
+        key: 'Tab',
+        cancelable: true
+      }
+    );
+
+    component.handleDocumentKeydown(forwardTab);
+
+    expect(forwardTab.defaultPrevented)
+      .toBe(true);
+
+    expect(document.activeElement)
+      .toBe(closeButton);
+
+    closeButton.focus();
+
+    const backwardTab = new KeyboardEvent(
+      'keydown',
+      {
+        key: 'Tab',
+        shiftKey: true,
+        cancelable: true
+      }
+    );
+
+    component.handleDocumentKeydown(backwardTab);
+
+    expect(backwardTab.defaultPrevented)
+      .toBe(true);
+
+    expect(document.activeElement)
+      .toBe(lastButton);
+  });
+
+  it('ferme le menu puis navigue vers l ajout de fichiers', () => {
+    const component = prepareConnectedComponent();
+
+    component.mobileMenuOpen = true;
+
+    component.addFiles();
+
+    expect(component.mobileMenuOpen)
+      .toBe(false);
+
+    expect(routerMock.navigate)
+      .toHaveBeenCalledWith(['/upload']);
+  });
+
+  it('ferme le menu et deconnecte l utilisateur', () => {
+    const component = prepareConnectedComponent();
+
+    component.mobileMenuOpen = true;
+
+    component.logout();
+
+    expect(component.mobileMenuOpen)
+      .toBe(false);
+
+    expect(authServiceMock.logout)
+      .toHaveBeenCalledTimes(1);
+
+    expect(routerMock.navigate)
+      .toHaveBeenCalledWith(['/login']);
   });
 });
