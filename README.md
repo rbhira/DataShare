@@ -84,6 +84,7 @@ http://localhost:8080
 DataShare/
 ├── backend/               application Spring Boot
 ├── frontend/              application Angular
+├── scripts/               scripts d'installation et de configuration Windows
 ├── uploads/               fichiers téléversés localement
 ├── docker-compose.yml     PostgreSQL local
 ├── .env                   variables locales non versionnées
@@ -111,6 +112,52 @@ Pour lancer DataShare localement :
 - Git.
 
 Angular CLI 21 peut également être installé pour les commandes Angular directes, mais le projet utilise ses dépendances locales via npm.
+
+## Installation assistée sous Windows
+
+Deux scripts sont fournis dans le dossier `scripts/`.
+
+### Préparer et vérifier PostgreSQL
+
+Depuis la racine du projet :
+
+```bat
+scripts\database-windows.bat
+```
+
+Ce script :
+
+- vérifie la présence du fichier `.env` ;
+- charge les variables PostgreSQL ;
+- démarre le conteneur PostgreSQL ;
+- attend que PostgreSQL soit réellement disponible avec `pg_isready` ;
+- affiche l'état du service.
+
+### Préparer l'environnement complet
+
+Depuis la racine du projet :
+
+```bat
+scripts\setup-windows.bat
+```
+
+Ce script :
+
+- vérifie Java, Maven, Node.js, npm, Docker et Docker Compose ;
+- crée `.env` à partir de `.env.example` s'il n'existe pas encore ;
+- refuse les valeurs d'exemple pour les secrets ;
+- vérifie la configuration Docker Compose ;
+- démarre PostgreSQL ;
+- installe les dépendances front-end avec `npm ci` ;
+- prépare le back-end avec Maven.
+
+Si `.env` vient d'être créé, le script s'arrête volontairement afin de laisser l'utilisateur remplacer les valeurs d'exemple avant de le relancer.
+
+Sous Windows, `npm ci` remplace le contenu de `node_modules`. Il est donc recommandé de fermer tout serveur Angular, test Vitest ou autre processus Node utilisant le dossier `frontend` avant d'exécuter le script.
+
+Lors d'une première installation, `npm ci` peut prendre plusieurs minutes selon la machine et la connexion réseau.
+
+Le script d'installation ne lance pas automatiquement l'application. Après une installation réussie, utiliser les commandes de démarrage du back-end et du front-end décrites ci-dessous.
 
 ## Configuration
 
