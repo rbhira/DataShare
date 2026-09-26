@@ -178,13 +178,13 @@ npx ng test --no-watch --no-progress --runner-config=vitest.config.ts
 Résultat de référence :
 
 ```text
-49 tests réussis
+55 tests réussis
 ```
 
 État :
 
 ```text
-49 / 49 tests réussis
+55 / 55 tests réussis
 ```
 
 Les tests couvrent notamment :
@@ -212,10 +212,10 @@ npx ng test --coverage --no-watch --no-progress --runner-config=vitest.config.ts
 Résultats :
 
 ```text
-Statements : 75.55 %
-Branches   : 74.20 %
-Functions  : 71.15 %
-Lines      : 75.98 %
+Statements : 76.49 %
+Branches   : 73.82 %
+Functions  : 75.22 %
+Lines      : 76.93 %
 ```
 
 Les quatre indicateurs globaux sont supérieurs à :
@@ -503,16 +503,16 @@ la suite frontend a été rejouée.
 Résultat :
 
 ```text
-49 / 49 tests réussis
+55 / 55 tests réussis
 ```
 
 La couverture est restée :
 
 ```text
-Statements : 75.55 %
-Branches   : 74.20 %
-Functions  : 71.15 %
-Lines      : 75.98 %
+Statements : 76.49 %
+Branches   : 73.82 %
+Functions  : 75.22 %
+Lines      : 76.93 %
 ```
 
 Le build Angular est également resté valide.
@@ -674,11 +674,11 @@ Toute nouvelle fonctionnalité importante doit être accompagnée de tests adapt
 Tests backend              : 55 / 55 réussis
 Couverture lignes backend  : 92.64 %
 
-Tests frontend             : 49 / 49 réussis
-Statements frontend        : 75.55 %
-Branches frontend          : 74.20 %
-Functions frontend         : 71.15 %
-Lines frontend             : 75.98 %
+Tests frontend             : 55 / 55 réussis
+Statements frontend        : 76.49 %
+Branches frontend          : 73.82 %
+Functions frontend         : 75.22 %
+Lines frontend             : 76.93 %
 
 Tests E2E                  : 3 / 3 réussis
 
