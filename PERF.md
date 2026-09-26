@@ -9,7 +9,7 @@ Ce document présente les contrôles de performance réalisés sur DataShare, en
 
 Les tests ont été réalisés avec k6 afin de mesurer les temps de réponse et le taux d'échec de l'API.
 
-Date du dernier test : 25 septembre 2026.
+Date du dernier test : 26 septembre 2026.
 
 ---
 
@@ -261,20 +261,179 @@ Aucune régression n'a été détectée par les tests existants.
 
 ---
 
-## 9. Bilan
+## 9. Budget de performance frontend
 
-État du contrôle de performance au 25 septembre 2026 :
+Un budget de performance frontend a été défini avant la mesure finale Lighthouse.
+
+### Budget du bundle
+
+Le projet Angular contient déjà les seuils suivants pour le bundle initial :
 
 ```text
-Test fumée upload/download       : réussi
-Test de charge 5 VUs / 20 cycles: réussi
-Checks k6                        : 80 / 80
-Échecs upload                    : 0 %
-Échecs téléchargement            : 0 %
-Upload 1 Mo p95                  : 1.06 s
-Download 1 Mo p95                : 956.11 ms
-Logs structurés                  : ajoutés
-Tests backend                    : 55 / 55 réussis
+Avertissement : 500 kB
+Erreur        : 1 MB
 ```
 
-Le scénario critique d'upload et de téléchargement a donc été testé sous charge locale sans erreur ni anomalie bloquante observée.
+### Budget navigateur
+
+Les objectifs retenus pour le contrôle Lighthouse sont :
+
+```text
+Performance : >= 90 / 100
+FCP         : <= 1.8 s
+LCP         : <= 2.5 s
+TBT         : <= 200 ms
+CLS         : <= 0.1
+```
+
+Ces valeurs constituent des objectifs internes au projet afin de détecter les régressions. Elles ne correspondent pas à un seuil de validation imposé par le cahier des charges.
+
+---
+
+## 10. Poids du bundle frontend
+
+Le build de production a été généré avec :
+
+```bash
+npm run build
+```
+
+Résultat :
+
+```text
+main JavaScript             : 349.91 kB
+styles CSS                  :   1.01 kB
+bundle initial total        : 350.93 kB
+transfert estimé par Angular:  88.78 kB
+```
+
+Le bundle initial de 350.93 kB reste inférieur au seuil d'avertissement Angular fixé à 500 kB.
+
+Le budget de poids du bundle est donc respecté.
+
+---
+
+## 11. Performance navigateur avec Lighthouse
+
+### Méthode
+
+Le build Angular de production situé dans :
+
+```text
+frontend/dist/datashare-frontend/browser
+```
+
+a été servi comme contenu statique local.
+
+La mesure finale a été réalisée avec Lighthouse sur le build compilé et non sur le serveur de développement Angular.
+
+Configuration Lighthouse :
+
+```text
+Form factor       : mobile
+Throttling        : simulation Lighthouse
+Serveur testé     : build statique local
+```
+
+Des mesures préliminaires réalisées sur le serveur Angular de développement ont été écartées après détection de ressources propres à Vite telles que `@vite/client` et `/@fs/`.
+
+Seule la mesure obtenue sur le build statique est retenue ci-dessous.
+
+### Résultats
+
+```text
+Performance : 70 / 100
+FCP         : 3.3 s
+LCP         : 3.3 s
+TBT         : 600 ms
+CLS         : 0
+Speed Index : 3.3 s
+```
+
+Diagnostics complémentaires :
+
+```text
+Requêtes réseau       : 5
+Scripts               : 1
+Poids réseau total    : 402.3 kB
+Travail main thread   : 467 ms
+```
+
+### Comparaison avec le budget
+
+```text
+Bundle initial < 500 kB : respecté
+Performance >= 90       : non atteint
+FCP <= 1.8 s            : non atteint
+LCP <= 2.5 s            : non atteint
+TBT <= 200 ms           : non atteint
+CLS <= 0.1              : respecté
+```
+
+Le budget navigateur n'est donc que partiellement atteint sur cette mesure locale mobile simulée.
+
+Le résultat doit cependant être interprété dans le contexte de l'environnement de test.
+
+Lighthouse identifie notamment les pistes suivantes :
+
+```text
+Compression des ressources texte : gain potentiel estimé à environ 1200 ms
+JavaScript inutilisé              : gain potentiel estimé à environ 750 ms
+```
+
+Le serveur statique local utilisé pour le test ne reproduit pas nécessairement la compression gzip ou Brotli d'un serveur de production. Une partie du gain estimé sur la compression dépend donc de la future configuration de déploiement.
+
+La quantité de JavaScript inutilisé constitue une piste d'optimisation réelle. Elle pourrait être réduite en poursuivant le découpage du code et le chargement différé des fonctionnalités lorsque cela est pertinent.
+
+Le CLS de 0 montre qu'aucun déplacement de mise en page significatif n'a été observé pendant le chargement.
+
+### Actions d'optimisation possibles
+
+Les optimisations suivantes pourront être étudiées lors d'une évolution du projet :
+
+- activer gzip ou Brotli sur le serveur ou reverse proxy de production ;
+- poursuivre le lazy loading et le découpage du JavaScript si la taille fonctionnelle de l'application augmente ;
+- surveiller régulièrement le poids du bundle Angular ;
+- relancer Lighthouse dans un environnement proche de la production après configuration du serveur ;
+- comparer les nouvelles mesures avec ce budget afin de détecter les régressions.
+
+Aucune modification fonctionnelle supplémentaire n'a été introduite uniquement pour augmenter artificiellement le score Lighthouse. La mesure actuelle sert de référence documentée pour les futures optimisations.
+
+---
+
+## 12. Bilan
+
+État du contrôle de performance au 26 septembre 2026 :
+
+```text
+Backend
+-------
+Test fumée upload/download        : réussi
+Test de charge 5 VUs / 20 cycles : réussi
+Checks k6                         : 80 / 80
+Échecs upload                     : 0 %
+Échecs téléchargement             : 0 %
+Upload 1 Mo p95                   : 1.06 s
+Download 1 Mo p95                 : 956.11 ms
+Logs structurés                   : ajoutés
+Tests backend                     : 55 / 55 réussis
+
+Frontend
+--------
+Build de production               : réussi
+Bundle initial                    : 350.93 kB
+Transfert estimé Angular          : 88.78 kB
+Budget bundle < 500 kB            : respecté
+Lighthouse Performance            : 70 / 100
+FCP                               : 3.3 s
+LCP                               : 3.3 s
+TBT                               : 600 ms
+CLS                               : 0
+Budget navigateur                 : partiellement atteint
+```
+
+Les opérations critiques d'upload et de téléchargement ont été testées sous charge locale sans erreur bloquante.
+
+Le frontend respecte son budget de taille de bundle. La mesure Lighthouse met en évidence des possibilités d'amélioration, principalement sur la compression des ressources et la quantité de JavaScript inutilisé.
+
+Ces résultats fournissent une référence mesurée et documentée permettant de suivre les futures régressions et optimisations de DataShare.
