@@ -2,11 +2,6 @@ import { Routes } from '@angular/router';
 
 import { authGuard } from './auth.guard';
 import { Welcome } from './features/auth/welcome/welcome';
-import { Login } from './features/auth/login/login';
-import { Register } from './features/auth/register/register';
-import { Upload } from './features/upload/upload';
-import { Download } from './features/download/download';
-import { MyFiles } from './features/my-files/my-files';
 
 export const routes: Routes = [
   {
@@ -15,24 +10,29 @@ export const routes: Routes = [
   },
   {
     path: 'login',
-    component: Login
+    loadComponent: () =>
+      import('./features/auth/login/login').then((m) => m.Login)
   },
   {
     path: 'register',
-    component: Register
+    loadComponent: () =>
+      import('./features/auth/register/register').then((m) => m.Register)
   },
   {
     path: 'upload',
-    component: Upload,
+    loadComponent: () =>
+      import('./features/upload/upload').then((m) => m.Upload),
     canActivate: [authGuard]
   },
   {
     path: 'download/:token',
-    component: Download
+    loadComponent: () =>
+      import('./features/download/download').then((m) => m.Download)
   },
   {
     path: 'my-files',
-    component: MyFiles,
+    loadComponent: () =>
+      import('./features/my-files/my-files').then((m) => m.MyFiles),
     canActivate: [authGuard]
   },
   {
