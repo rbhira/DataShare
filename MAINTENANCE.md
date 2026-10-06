@@ -6,7 +6,7 @@ Ce document décrit les procédures courantes permettant de démarrer, arrêter,
 
 Il complète les documents de qualité du projet en donnant les informations nécessaires à une reprise technique de l'application.
 
-Date de dernière mise à jour : 25 septembre 2026.
+Date de dernière mise à jour : 6 octobre 2026.
 
 ---
 
@@ -455,16 +455,16 @@ npx ng test --coverage --no-watch --no-progress --runner-config=vitest.config.ts
 État de référence :
 
 ```text
-49 tests réussis
+55 tests réussis
 ```
 
 Couverture actuelle :
 
 ```text
-Statements : 75.55 %
-Branches   : 74.20 %
-Functions  : 71.15 %
-Lines      : 75.98 %
+Statements : 76.49 %
+Branches   : 73.82 %
+Functions  : 75.22 %
+Lines      : 76.93 %
 ```
 
 Les quatre indicateurs globaux restent supérieurs à 70 %.
@@ -650,7 +650,34 @@ Une mise à jour de sécurité doit être accompagnée d'une vérification de no
 
 ---
 
-## 22. Diagnostic des problèmes courants
+## 22. Fréquence et risques des mises à jour
+
+### Fréquence recommandée
+
+| Type de mise à jour | Fréquence | Contrôles |
+|---|---|---|
+| Correctif de sécurité (vulnérabilité critique ou haute signalée par `npm audit` ou Trivy) | Dès sa publication | Procédure de la section 21 + nouveau scan |
+| Contrôle des dépendances (`npm outdated`, `npm audit`, Trivy) | Une fois par mois | Rapport consigné dans SECURITY.md si une action est requise |
+| Mises à jour mineures et correctives (Angular, Spring Boot, bibliothèques) | Une fois par mois, regroupées | Tests, couverture, build, E2E |
+| Versions majeures (Angular, Spring Boot, Java LTS, PostgreSQL) | Planifiées, sur une branche dédiée | Lecture des notes de migration + campagne de tests complète |
+| Image Docker PostgreSQL | À chaque mise à jour mineure de l'image `postgres:17` | Sauvegarde préalable (section 10) |
+
+### Risques à surveiller
+
+- **Changements incompatibles** dans une version majeure : API dépréciée, configuration modifiée (Spring Security, routage Angular).
+- **Dépendances transitives** : une mise à jour peut introduire une nouvelle vulnérabilité ou une régression indirecte ; d'où le scan systématique après mise à jour.
+- **Régressions fonctionnelles** sur les parcours critiques (upload, téléchargement, authentification) : couvertes par les tests E2E.
+- **Base de données** : une montée de version majeure de PostgreSQL impose une sauvegarde et une migration des données ; ne jamais la faire sans sauvegarde testée.
+- **Secrets** : un changement de `JWT_SECRET` invalide tous les jetons en cours, et les utilisateurs doivent se reconnecter.
+- **Performance** : rejouer le test k6 et la mesure Lighthouse après une mise à jour majeure du front ou du back, et comparer aux valeurs de PERF.md.
+
+### Règle de décision
+
+Une mise à jour n'est fusionnée dans `main` qu'après une Pull Request dont les tests, la couverture, le build et, si nécessaire, les E2E sont verts.
+
+---
+
+## 23. Diagnostic des problèmes courants
 
 ### Port 8080 déjà utilisé
 
@@ -712,7 +739,7 @@ Recharger le `.env` avant de lancer le backend.
 
 ---
 
-## 23. Contrôles avant intégration d'une modification
+## 24. Contrôles avant intégration d'une modification
 
 Avant de fusionner une modification importante dans `main` :
 
@@ -730,31 +757,27 @@ Avant de fusionner une modification importante dans `main` :
 
 ---
 
-## 24. Documents associés
+## 25. Documents associés
 
 Les documents suivants complètent cette procédure :
 
 ```text
+README.md
+TESTING.md
 SECURITY.md
 PERF.md
-```
-
-Les documents suivants sont également prévus dans le cadre de la finalisation du projet :
-
-```text
-TESTING.md
-README.md
+AI_CODE_REVIEW.md
 ```
 
 ---
 
-## 25. Bilan de maintenance
+## 26. Bilan de maintenance
 
-État de référence de DataShare au 25 septembre 2026 :
+État de référence final de DataShare :
 
 ```text
 Backend tests         : 55 / 55 réussis
-Frontend tests        : 49 / 49 réussis
+Frontend tests        : 55 / 55 réussis
 E2E                   : 3 / 3 réussis
 Couverture frontend   : > 70 % sur les 4 indicateurs
 Couverture backend    : > 90 % sur les lignes
