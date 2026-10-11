@@ -12,7 +12,7 @@ import {
 describe('Download', () => {
 
   let getFileInfo: ReturnType<typeof vi.fn>;
-  let downloadFile: ReturnType<typeof vi.fn>;
+  let getDownloadUrl: ReturnType<typeof vi.fn>;
   let component: Download;
 
   function createComponent(token = 'valid-token'): Download {
@@ -26,7 +26,7 @@ describe('Download', () => {
 
     const fileDownloadService = {
       getFileInfo,
-      downloadFile
+      getDownloadUrl
     } as unknown as FileDownloadService;
 
     const changeDetectorRef = {
@@ -42,7 +42,7 @@ describe('Download', () => {
 
   beforeEach(() => {
     getFileInfo = vi.fn();
-    downloadFile = vi.fn();
+    getDownloadUrl = vi.fn();
     component = createComponent();
   });
 
@@ -140,31 +140,18 @@ describe('Download', () => {
     ).toBe('2.0 Go');
   });
 
-  it('affiche une erreur si le fichier disparait pendant le telechargement', () => {
+  it('construit l URL de telechargement natif', () => {
     component.token = 'valid-token';
 
-    component.fileInfo = {
-      originalName: 'rapport.pdf',
-      mimeType: 'application/pdf',
-      size: 1500,
-      expiresAt: '2026-09-30T18:00:00'
-    };
-
-    downloadFile.mockReturnValue(
-      throwError(() => ({
-        status: 404
-      }))
+    getDownloadUrl.mockReturnValue(
+      '/api/download/valid-token/file'
     );
 
-    component.download();
+    expect(component.downloadUrl)
+      .toBe('/api/download/valid-token/file');
 
-    expect(downloadFile)
+    expect(getDownloadUrl)
       .toHaveBeenCalledWith('valid-token');
-
-    expect(component.downloading)
-      .toBe(false);
-
-    expect(component.errorMessage)
-      .toBe('Le fichier est introuvable.');
   });
+
 });
