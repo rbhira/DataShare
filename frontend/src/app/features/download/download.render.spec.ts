@@ -46,7 +46,9 @@ describe('Download template', () => {
             getFileInfo: vi.fn(
               () => fileInfo$.asObservable()
             ),
-            downloadFile: vi.fn()
+            getDownloadUrl: vi.fn(
+              () => '/api/download/token-test/file'
+            )
           }
         }
       ]

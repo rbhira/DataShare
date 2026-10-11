@@ -24,12 +24,7 @@ export class FileDownloadService {
     );
   }
 
-  downloadFile(token: string): Observable<Blob> {
-    return this.http.get(
-      `${this.apiUrl}/${encodeURIComponent(token)}/file`,
-      {
-        responseType: 'blob'
-      }
-    );
+  getDownloadUrl(token: string): string {
+    return `${this.apiUrl}/${encodeURIComponent(token)}/file`;
   }
 }

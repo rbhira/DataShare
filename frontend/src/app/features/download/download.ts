@@ -21,7 +21,6 @@ export class Download implements OnInit {
   token = '';
 
   loading = true;
-  downloading = false;
 
   errorMessage = '';
 
@@ -74,55 +73,8 @@ export class Download implements OnInit {
       });
   }
 
-  download(): void {
-    if (!this.fileInfo || this.downloading) {
-      return;
-    }
-
-    this.downloading = true;
-    this.errorMessage = '';
-
-    this.fileDownloadService
-      .downloadFile(this.token)
-      .subscribe({
-        next: (blob) => {
-          const url =
-            window.URL.createObjectURL(blob);
-
-          const link =
-            document.createElement('a');
-
-          link.href = url;
-          link.download =
-            this.fileInfo!.originalName;
-
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
-
-          window.URL.revokeObjectURL(url);
-
-          this.downloading = false;
-
-          this.changeDetectorRef.detectChanges();
-        },
-        error: (error) => {
-          this.downloading = false;
-
-          if (error.status === 410) {
-            this.errorMessage =
-              'Ce lien de téléchargement a expiré.';
-          } else if (error.status === 404) {
-            this.errorMessage =
-              'Le fichier est introuvable.';
-          } else {
-            this.errorMessage =
-              'Le téléchargement a échoué.';
-          }
-
-          this.changeDetectorRef.detectChanges();
-        }
-      });
+  get downloadUrl(): string {
+    return this.fileDownloadService.getDownloadUrl(this.token);
   }
 
   formatSize(size: number): string {

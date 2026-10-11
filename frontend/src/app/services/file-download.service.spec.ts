@@ -65,31 +65,12 @@ describe('FileDownloadService', () => {
     request.flush(response);
   });
 
-  it('telecharge le fichier en tant que blob', () => {
-    const token = 'download-token';
+  it('construit l URL de telechargement natif', () => {
+    const token = 'token/avec espace';
 
-    service.downloadFile(token)
-      .subscribe(result => {
-        expect(result)
-          .toBeInstanceOf(Blob);
-      });
-
-    const request =
-      httpTesting.expectOne(
-        '/api/download/download-token/file'
+    expect(service.getDownloadUrl(token))
+      .toBe(
+        '/api/download/token%2Favec%20espace/file'
       );
-
-    expect(request.request.method)
-      .toBe('GET');
-
-    expect(request.request.responseType)
-      .toBe('blob');
-
-    request.flush(
-      new Blob(
-        ['contenu'],
-        { type: 'text/plain' }
-      )
-    );
   });
 });
